@@ -27,28 +27,28 @@ export default function DashboardStats({ stats }) {
       value: totalArtists,
       icon: Users,
       color: 'text-white',
-      bgColor: 'bg-blue-600'
+      bgColor: 'bg-gradient-to-r from-purple-600 to-purple-800'
     },
     {
       title: 'Total Releases',
       value: totalReleases,
       icon: Music2,
       color: 'text-white',
-      bgColor: 'bg-orange-600'
+      bgColor: 'bg-gradient-to-r from-pink-600 to-purple-700'
     },
     {
       title: 'Total Streams',
       value: formatNumber(totalStreams),
       icon: PlayCircle,
       color: 'text-white',
-      bgColor: 'bg-green-600'
+      bgColor: 'bg-gradient-to-r from-blue-600 to-blue-800'
     },
     {
       title: 'Monthly Revenue',
       value: `$${totalRevenue}`,
       icon: CreditCard,
       color: 'text-white',
-      bgColor: 'bg-purple-600'
+      bgColor: 'bg-gradient-to-r from-purple-500 to-pink-700'
     }
   ];
 
@@ -57,7 +57,7 @@ export default function DashboardStats({ stats }) {
       {statCards.map((stat, index) => (
         <div 
           key={index}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
         >
           <div className={`${stat.bgColor} p-4`}>
             <div className="flex justify-between items-center">
@@ -68,7 +68,7 @@ export default function DashboardStats({ stats }) {
           </div>
           <div className="p-4 bg-white dark:bg-gray-800">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className={`h-1 ${stat.bgColor.replace('bg-', 'bg-')} rounded-full`} style={{ width: '60%' }}></div>
+              <div className={`h-1 ${stat.bgColor.replace('bg-gradient-to-r ', '')} rounded-full`} style={{ width: '60%' }}></div>
             </div>
           </div>
         </div>

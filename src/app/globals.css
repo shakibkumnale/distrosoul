@@ -150,10 +150,17 @@
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #ff3a8c 0%, #8a3ab9 50%, #4c68d7 100%);
+  background: linear-gradient(to right, #c084fc, #e879f9);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-subtle {
+  background: linear-gradient(to right, #a855f7, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Glowing effects for highlights */

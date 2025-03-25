@@ -2,6 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Users, Music2, PlayCircle, TrendingUp, User, UserPlus } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 import DashboardStats from '@/components/admin/DashboardStats';
 
 export default function AdminDashboard() {
@@ -45,7 +48,7 @@ export default function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
       </div>
     );
   }
@@ -59,39 +62,58 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-8">Dashboard</h1>
+    <div className="p-6 bg-gray-50 dark:bg-gray-900">
+      <h1 className="text-3xl font-bold text-purple-700 dark:text-purple-400 mb-8">Dashboard</h1>
       
       <DashboardStats stats={stats} />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-blue-700 dark:text-blue-400 mb-4">Popular Artists</h2>
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-bold text-purple-700 dark:text-purple-400 flex items-center">
+              <UserPlus className="mr-2 h-5 w-5" />
+              Popular Artists
+            </h2>
+          </div>
           
-          <div className="space-y-4">
+          <div className="max-h-[450px] overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-200 dark:scrollbar-track-gray-700">
             {stats.popularArtists && stats.popularArtists.length > 0 ? (
               stats.popularArtists.map((artist, index) => (
-                <div key={artist._id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="font-bold text-xl text-blue-600 dark:text-blue-300 w-8 text-center">
+                <div 
+                  key={artist._id} 
+                  className="flex items-center gap-4 p-4 mb-3 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all hover:shadow-md"
+                >
+                  <div className="font-bold text-xl text-white bg-purple-600 dark:bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
                     {index + 1}
                   </div>
-                  <div className="relative h-12 w-12 rounded-full overflow-hidden">
-                    <img 
-                      src={artist.image || '/images/placeholder-avatar.jpg'} 
-                      alt={artist.name}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-purple-300 dark:border-purple-600">
+                    {artist.image ? (
+                      <Image 
+                        src={artist.image} 
+                        alt={artist.name}
+                        width={56}
+                        height={56}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                        <User className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 dark:text-white">{artist.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{artist.followers?.toLocaleString() || 0} followers</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 dark:text-white truncate">{artist.name}</h3>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                      <Users className="w-3.5 h-3.5 mr-1" />
+                      <span>{artist.followers.toLocaleString()} followers</span>
+                    </div>
                   </div>
-                  <a
+                  <Link
                     href={`/admin/artists/${artist.slug}`}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md text-sm font-medium hover:from-purple-700 hover:to-blue-700 transition-colors flex-shrink-0"
                   >
                     View Details
-                  </a>
+                  </Link>
                 </div>
               ))
             ) : (
@@ -103,45 +125,45 @@ export default function AdminDashboard() {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-blue-700 dark:text-blue-400 mb-4">Plans Distribution</h2>
+          <h2 className="text-xl font-bold text-purple-700 dark:text-purple-400 mb-6">Plans Distribution</h2>
           
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
-                <div className="h-3 w-3 rounded-full bg-blue-500 mr-2"></div>
+                <div className="h-4 w-4 rounded-full bg-blue-500 mr-3"></div>
                 <span className="text-gray-700 dark:text-gray-200">Basic</span>
               </div>
-              <span className="font-bold text-gray-900 dark:text-white">{stats.planCounts?.basic || 0}</span>
+              <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">{stats.planCounts?.basic || 0}</span>
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
-                <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                <div className="h-4 w-4 rounded-full bg-green-500 mr-3"></div>
                 <span className="text-gray-700 dark:text-gray-200">Pro</span>
               </div>
-              <span className="font-bold text-gray-900 dark:text-white">{stats.planCounts?.pro || 0}</span>
+              <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">{stats.planCounts?.pro || 0}</span>
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
-                <div className="h-3 w-3 rounded-full bg-purple-500 mr-2"></div>
+                <div className="h-4 w-4 rounded-full bg-purple-500 mr-3"></div>
                 <span className="text-gray-700 dark:text-gray-200">Premium</span>
               </div>
-              <span className="font-bold text-gray-900 dark:text-white">{stats.planCounts?.premium || 0}</span>
+              <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">{stats.planCounts?.premium || 0}</span>
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
-                <div className="h-3 w-3 rounded-full bg-orange-500 mr-2"></div>
+                <div className="h-4 w-4 rounded-full bg-orange-500 mr-3"></div>
                 <span className="text-gray-700 dark:text-gray-200">Aoc</span>
               </div>
-              <span className="font-bold text-gray-900 dark:text-white">{stats.planCounts?.aoc || 0}</span>
+              <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-full">{stats.planCounts?.aoc || 0}</span>
             </div>
             
-            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="p-4 mt-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-100 dark:border-purple-800/30">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-gray-700 dark:text-gray-200">Total Active Plans:</span>
-                <span className="font-bold text-gray-900 dark:text-white">
+                <span className="font-bold text-purple-700 dark:text-purple-300">
                   {(stats.planCounts?.basic || 0) + 
                    (stats.planCounts?.pro || 0) + 
                    (stats.planCounts?.premium || 0) + 

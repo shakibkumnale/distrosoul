@@ -10,6 +10,25 @@ export const metadata = {
 
 const plans = [
   {
+    id: 'pro',
+    name: 'Pro Plan',
+    price: '599',
+    period: 'Year',
+    description: 'For serious artists ready to grow their career',
+    features: [
+      'Unlimited Releases (1 Year)',
+      '50% Royalties',
+      '150+ Indian & International Stores',
+      'Custom Release Date & Spotify Verification',
+      'Content ID & Playlist Pitching',
+      'Instagram Audio Page Linking',
+      '24/7 Support | Approval in 24H | Live in 2 Days',
+      'Lifetime Availability – No Hidden Fees!'
+    ],
+    popular: false,
+    extraInfo: 'All this for just ₹599/year (Less than ₹50/month!)'
+  },
+  {
     id: 'basic',
     name: 'Basic Plan',
     price: '99',
@@ -17,30 +36,15 @@ const plans = [
     description: 'Perfect for new artists beginning their journey',
     features: [
       'Unlimited Releases (1 Year)',
-      '150+ Indian & International DSPs',
-      'Custom Release Date',
-      'Spotify Verification',
+      '150+ Indian & International Stores',
+      'Custom Release Date & Spotify Verification',
       'Content ID & Playlist Pitching',
       'Instagram Audio Page Linking',
       '24/7 Support | Approval in 24H | Live in 2 Days',
-      'Lifetime Availability',
-      '50% Royalties',
-    ],
-    popular: false,
-  },
-  {
-    id: 'pro',
-    name: 'Pro Plan',
-    price: '599',
-    period: 'Year',
-    description: 'For serious artists ready to grow their career',
-    features: [
-      'Everything in Basic Plan',
-      '100% Royalties - Keep All Your Earnings',
-      'Faster Support & Priority Approval',
-      'Higher Playlist Pitching Chance',
+      'Lifetime Availability – No Hidden Fees!'
     ],
     popular: true,
+    extraInfo: 'All this for just ₹99/year (Less than ₹10/month!)'
   },
   {
     id: 'premium',
@@ -49,13 +53,17 @@ const plans = [
     period: 'Year',
     description: 'Complete solution for professional artists',
     features: [
-      'Everything in Pro Plan',
-      '100% Royalties - Full Control Over Earnings',
-      'Faster Approval & Exclusive Support',
-      'Better Playlist Pitching & Promo Support',
-      'YouTube Verification Badge (Chargeable)',
+      'Unlimited Releases (1 Year)',
+      '100% Royalties',
+      '150+ Indian & International Stores',
+      'Custom Release Date & Spotify Verification',
+      'Content ID & Playlist Pitching',
+      'Instagram Audio Page Linking',
+      '24/7 Support | Approval in 24H | Live in 2 Days',
+      'Lifetime Availability – No Hidden Fees!'
     ],
     popular: false,
+    extraInfo: 'All this for just ₹1199/year (Less than ₹100/month!)'
   },
 ];
 
@@ -113,8 +121,10 @@ const ServicesPage = () => {
           Join thousands of independent artists who trust SoulDistribution with their music career.
         </p>
         <a 
-          href="/contact" 
+          href="https://wa.me/8291121080" 
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300"
+          target="_blank" 
+          rel="noopener noreferrer"
         >
           Get Started Now
         </a>

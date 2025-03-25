@@ -6,6 +6,7 @@ import LatestReleases from '@/components/home/LatestReleases';
 import SpotifyPlayer from '@/components/spotify/SpotifyPlayer';
 import SpotifyPlaylistGrid from '@/components/spotify/SpotifyPlaylistGrid';
 import YouTubeEmbed from '@/components/youtube/YouTubeEmbed';
+import InfiniteLogos from '@/components/home/InfiniteLogos';
 import connectToDatabase from '@/lib/db';
 import Artist from '@/models/Artist';
 import Release from '@/models/Release';
@@ -60,71 +61,71 @@ const featuredVideos = [
 
 // Major DSP platforms we distribute to
 const majorDSPs = [
-  { name: 'Spotify', logo: '/images/dsp-logos/spotify.png', highlight: true },
-  { name: 'Apple Music', logo: '/images/dsp-logos/apple-music.png', highlight: true },
-  { name: 'Amazon Music', logo: '/images/dsp-logos/amazon-music.png', highlight: true },
-  { name: 'YouTube Music', logo: '/images/dsp-logos/youtube-music.png', highlight: true },
-  { name: 'Tidal', logo: '/images/dsp-logos/tidal.png', highlight: true },
-  { name: 'Deezer', logo: '/images/dsp-logos/deezer.png', highlight: true },
-  { name: 'TikTok', logo: '/images/dsp-logos/tiktok.png', highlight: true },
-  { name: 'Instagram/Facebook', logo: '/images/dsp-logos/meta.png', highlight: true },
-  { name: 'Pandora', logo: '/images/dsp-logos/pandora.png' },
-  { name: 'iHeartRadio', logo: '/images/dsp-logos/iheartradio.png' },
-  { name: 'Snapchat', logo: '/images/dsp-logos/snapchat.png' },
-  { name: 'Beatport', logo: '/images/dsp-logos/beatport.png' },
-  { name: 'Audiomack', logo: '/images/dsp-logos/audiomack.png' },
-  { name: 'Boomplay', logo: '/images/dsp-logos/boomplay.png' },
-  { name: '140+ More', logo: '/images/dsp-logos/more.png' },
+  { name: 'Spotify', logo: '/images/DSPsLogos/spotify.webp', highlight: true },
+  { name: 'Amazon', logo: '/images/DSPsLogos/amazon.png', highlight: true },
+  { name: 'Deezer', logo: '/images/DSPsLogos/deezer.jpg', highlight: true },
+  { name: 'Instagram', logo: '/images/DSPsLogos/instagram.png', highlight: true },
+  { name: 'TikTok', logo: '/images/DSPsLogos/tiktok.png', highlight: true },
+  { name: 'YouTube Music', logo: '/images/DSPsLogos/Youtube_Music.png', highlight: true },
 ];
 
 // Distribution service plans
 const servicePlans = [
   {
-    name: 'BASIC',
-    description: 'Perfect for new artists',
-    price: '$9.99',
-    term: 'per release',
-    features: [
-      'Distribution to 150+ Platforms',
-      'Keep 100% of Your Royalties',
-      'Unlimited Releases',
-      'Free ISRC & UPC Codes',
-      'Basic Analytics Dashboard'
-    ],
-    highlight: false,
-    color: 'bg-blue-600'
-  },
-  {
     name: 'PRO',
     description: 'For serious artists',
-    price: '$19.99',
-    term: 'per release',
+    price: '₹599',
+    term: '/year',
     features: [
-      'All Basic Features',
-      'Priority Distribution',
-      'Advanced Analytics',
-      'Playlist Submission Tool',
-      'Cover Art Creator',
-      'Pre-Release Support'
+      'Unlimited Releases (1 Year)',
+      '50% Royalties',
+      '150+ Indian & International Stores',
+      'Custom Release Date & Spotify Verification',
+      'Content ID & Playlist Pitching',
+      'Instagram Audio Page Linking',
+      '24/7 Support | Approval in 24H | Live in 2 Days',
+      'Lifetime Availability – No Hidden Fees!'
+    ],
+    highlight: false,
+    color: 'bg-purple-600',
+    extraInfo: 'All this for just ₹599/year (Less than ₹50/month!)'
+  },
+  {
+    name: 'BASIC',
+    description: 'Perfect for new artists',
+    price: '₹99',
+    term: '/year',
+    features: [
+      'Unlimited Releases (1 Year)',
+      '150+ Indian & International Stores',
+      'Custom Release Date & Spotify Verification',
+      'Content ID & Playlist Pitching',
+      'Instagram Audio Page Linking',
+      '24/7 Support | Approval in 24H | Live in 2 Days',
+      'Lifetime Availability – No Hidden Fees!'
     ],
     highlight: true,
-    color: 'bg-purple-600'
+    color: 'bg-blue-600',
+    extraInfo: 'All this for just ₹99/year (Less than ₹10/month!)'
   },
   {
     name: 'PREMIUM',
     description: 'For professional artists',
-    price: '$29.99',
-    term: 'per release',
+    price: '₹1199',
+    term: '/year',
     features: [
-      'All Pro Features',
-      'Marketing Support',
-      'Editorial Playlist Pitching',
-      'Social Media Promotion',
-      'Personalized Release Strategy',
-      'Priority Customer Support'
+      'Unlimited Releases (1 Year)',
+      '100% Royalties',
+      '150+ Indian & International Stores',
+      'Custom Release Date & Spotify Verification',
+      'Content ID & Playlist Pitching',
+      'Instagram Audio Page Linking',
+      '24/7 Support | Approval in 24H | Live in 2 Days',
+      'Lifetime Availability – No Hidden Fees!'
     ],
     highlight: false,
-    color: 'bg-pink-600'
+    color: 'bg-pink-600',
+    extraInfo: 'All this for just ₹1199/year (Less than ₹100/month!)'
   }
 ];
 
@@ -133,10 +134,9 @@ async function getData() {
   try {
     await connectToDatabase();
     
-    // Get featured artists
+    // Get featured artists - remove the limit to fetch all featured artists
     const featuredArtists = await Artist.find({ featured: true })
-      .sort({ createdAt: -1 })
-      .limit(5)
+      .sort({ 'spotifyData.followers': -1 })
       .lean();
     
     // Get latest releases with featured flag set to true
@@ -163,107 +163,102 @@ export default async function HomePage() {
   const { featuredArtists, latestReleases } = await getData();
   
   return (
-    <main className="min-h-screen bg-gradient-dark">
+    <main className="min-h-screen bg-gradient-dark overflow-x-hidden">
       <HeroBanner />
       
       {/* Distribution Services Section */}
-      <section className="py-28 px-4 md:px-14  w-full relative">
+      <section className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-transparent opacity-50 pointer-events-none"></div>
         <div className="relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-6 text-gradient">Global Music Distribution</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-gradient">Global Music Distribution</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
               Distribute your music to over 150+ digital streaming platforms worldwide with just a few clicks.
               Reach millions of listeners and keep 100% of your royalties.
             </p>
           </div>
           
-          <div className="mt-12">
+          <div className="mt-8 sm:mt-12">
             <Tabs defaultValue="platforms" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-800/60">
-                <TabsTrigger value="platforms" className="text-lg py-3 data-[state=active]:bg-purple-900/70 data-[state=active]:text-white">Distribution Platforms</TabsTrigger>
-                <TabsTrigger value="features" className="text-lg py-3 data-[state=active]:bg-purple-900/70 data-[state=active]:text-white">Why Choose Us</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-gray-800/60">
+                <TabsTrigger value="platforms" className="text-sm sm:text-lg py-2 sm:py-3 data-[state=active]:bg-purple-900/70 data-[state=active]:text-white">Distribution Platforms</TabsTrigger>
+                <TabsTrigger value="features" className="text-sm sm:text-lg py-2 sm:py-3 data-[state=active]:bg-purple-900/70 data-[state=active]:text-white">Why Choose Us</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="platforms" className="mt-8">
-                <div className="text-center mb-8">
-                  <Badge variant="outline" className="px-4 py-1 text-lg mb-4 border-purple-500 text-purple-300">
+              <TabsContent value="platforms" className="mt-6 sm:mt-8">
+                <div className="text-center mb-6 sm:mb-8">
+                  <Badge variant="outline" className="px-3 py-0.5 sm:px-4 sm:py-1 text-base sm:text-lg mb-3 sm:mb-4 border-purple-500 text-purple-300">
                     150+ Global Platforms
                   </Badge>
-                  <h3 className="text-2xl font-medium mb-4">Get your music on all major streaming platforms</h3>
+                  <h3 className="text-xl sm:text-2xl font-medium mb-3 sm:mb-4">Get your music on all major streaming platforms</h3>
+                  <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto mb-4 sm:mb-6">
+                    From major platforms to niche services, we ensure your music reaches audiences everywhere.
+                  </p>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center justify-center mb-12">
-                  {majorDSPs.map((dsp, index) => (
-                    <div key={index} className={`flex flex-col items-center justify-center p-4 rounded-lg ${dsp.highlight ? 'bg-gradient-to-b from-purple-900/30 to-gray-900 shadow-lg' : 'bg-black/20'}`}>
-                      <div className="relative w-16 h-16 mb-2">
-                        {/* In a real app, you would have these logo images */}
-                        <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center">
-                          <Music className="w-8 h-8 text-gray-400" />
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium mt-2">{dsp.name}</span>
-                    </div>
-                  ))}
+                <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-semibold text-gradient-subtle text-center">
+                  Our Major Distribution Partners
                 </div>
                 
-                <div className="text-center mt-8">
-                  <Button asChild size="lg" className="bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500 border-0">
+                <InfiniteLogos dsps={majorDSPs} />
+                
+                <div className="text-center mt-6 sm:mt-8">
+                  <Button asChild size="lg" className="text-sm sm:text-base bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500 border-0">
                     <Link href="/services">
                       View All Distribution Platforms
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                     </Link>
                   </Button>
                 </div>
               </TabsContent>
               
-              <TabsContent value="features" className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <TabsContent value="features" className="mt-6 sm:mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                   <Card className="bg-gradient-to-b from-purple-900/20 to-gray-900/80 border-gray-800">
-                    <CardHeader>
-                      <Globe className="h-12 w-12 text-blue-400 mb-4" />
-                      <CardTitle>Worldwide Reach</CardTitle>
-                      <CardDescription className="text-gray-300">Get your music heard across the globe</CardDescription>
+                    <CardHeader className="pb-2 sm:pb-4">
+                      <Globe className="h-8 w-8 sm:h-12 sm:w-12 text-blue-400 mb-2 sm:mb-4" />
+                      <CardTitle className="text-lg sm:text-xl">Worldwide Reach</CardTitle>
+                      <CardDescription className="text-sm sm:text-base text-gray-300">Get your music heard across the globe</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-300">
+                      <p className="text-sm sm:text-base text-gray-300">
                         Distribute your music to over 150 streaming platforms and digital stores worldwide. Reach fans in every corner of the world.
                       </p>
                     </CardContent>
                   </Card>
                   
                   <Card className="bg-gradient-to-b from-purple-900/20 to-gray-900/80 border-gray-800">
-                    <CardHeader>
-                      <PieChart className="h-12 w-12 text-green-400 mb-4" />
-                      <CardTitle>Keep 100% Royalties</CardTitle>
-                      <CardDescription className="text-gray-300">No commission, all earnings are yours</CardDescription>
+                    <CardHeader className="pb-2 sm:pb-4">
+                      <PieChart className="h-8 w-8 sm:h-12 sm:w-12 text-green-400 mb-2 sm:mb-4" />
+                      <CardTitle className="text-lg sm:text-xl">Keep 100% Royalties</CardTitle>
+                      <CardDescription className="text-sm sm:text-base text-gray-300">No commission, all earnings are yours</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-300">
+                      <p className="text-sm sm:text-base text-gray-300">
                         Unlike other distributors, we let you keep 100% of your streaming and download royalties. Your music, your money.
                       </p>
                     </CardContent>
                   </Card>
                   
                   <Card className="bg-gradient-to-b from-purple-900/20 to-gray-900/80 border-gray-800">
-                    <CardHeader>
-                      <BarChart className="h-12 w-12 text-purple-400 mb-4" />
-                      <CardTitle>Advanced Analytics</CardTitle>
-                      <CardDescription className="text-gray-300">Track your performance in real-time</CardDescription>
+                    <CardHeader className="pb-2 sm:pb-4">
+                      <BarChart className="h-8 w-8 sm:h-12 sm:w-12 text-purple-400 mb-2 sm:mb-4" />
+                      <CardTitle className="text-lg sm:text-xl">Advanced Analytics</CardTitle>
+                      <CardDescription className="text-sm sm:text-base text-gray-300">Track your performance in real-time</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-300">
+                      <p className="text-sm sm:text-base text-gray-300">
                         Access detailed reports on streams, revenue, listener demographics, and more to help you grow your audience effectively.
                       </p>
                     </CardContent>
                   </Card>
                 </div>
                 
-                <div className="text-center mt-12">
-                  <Button asChild size="lg" className="bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500 border-0">
+                <div className="text-center mt-8 sm:mt-12">
+                  <Button asChild size="lg" className="text-sm sm:text-base bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500 border-0">
                     <Link href="/services">
                       Learn More About Our Services
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                     </Link>
                   </Button>
                 </div>
@@ -274,46 +269,79 @@ export default async function HomePage() {
       </section>
       
       {/* Distribution Pricing Plans */}
-      <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto bg-gradient-to-b from-gray-900 via-purple-950/10 to-gray-900 rounded-3xl my-12 shadow-glow-primary">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 text-gradient">Distribution Plans</h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+      <section className="py-16 sm:py-20 md:py-24 px-4 md:px-8 max-w-7xl mx-auto bg-gradient-to-b from-gray-900 via-purple-950/10 to-gray-900 rounded-xl sm:rounded-2xl md:rounded-3xl my-8 sm:my-12 shadow-glow-primary">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gradient">Distribution Plans</h2>
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
             Choose the perfect plan for your music career, from new artists to established professionals.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {servicePlans.map((plan, index) => (
             <Card 
               key={index} 
-              className={`${plan.highlight ? 'bg-gradient-to-b from-purple-900/40 to-purple-950/60 border-purple-500/50 transform scale-105 shadow-xl' : 'bg-gradient-to-b from-gray-800/40 to-gray-900/60 border-gray-700/50'} overflow-hidden transition-all duration-300 hover:shadow-purple-900/20`}
+              className={`${plan.highlight ? 'bg-gradient-to-b from-purple-900/40 to-purple-950/60 border-purple-500/50 md:transform md:scale-105 shadow-xl' : 'bg-gradient-to-b from-gray-800/40 to-gray-900/60 border-gray-700/50'} overflow-hidden transition-all duration-300 hover:shadow-purple-900/20 relative`}
             >
               <div className={`${plan.name === 'BASIC' ? 'bg-gradient-to-r from-purple-700/70 to-blue-600' : plan.name === 'PRO' ? 'bg-gradient-to-r from-purple-700 to-pink-600' : 'bg-gradient-to-r from-pink-700 to-purple-700'} h-2 w-full`}></div>
-              <CardHeader className="pt-8">
-                <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
-                <CardDescription className="text-gray-300">{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-gray-400 ml-2">{plan.term}</span>
+              <CardHeader className="pt-6 sm:pt-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl sm:text-2xl font-bold flex items-center">
+                      {plan.name === 'BASIC' || plan.name === 'PRO' || plan.name === 'PREMIUM' ? (
+                        <span className="text-orange-500 mr-2">🔥</span>
+                      ) : null}
+                      {plan.name}
+                      {plan.name === 'PRO' && <span className="ml-2 text-blue-400">🚀</span>}
+                      {plan.name === 'PREMIUM' && <span className="ml-2">(Maximum Benefits!)</span>}
+                    </CardTitle>
+                    <CardDescription className="text-sm sm:text-base text-gray-300">{plan.description}</CardDescription>
+                  </div>
+                </div>
+                <div className="mt-3 sm:mt-4">
+                  <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
+                  <span className="text-sm sm:text-base text-gray-400 ml-2">{plan.term}</span>
                 </div>
               </CardHeader>
+              {plan.name === 'PRO' && (
+                <div className="absolute top-2 right-2 bg-white text-black text-lg font-bold rounded-full p-2 w-16 h-16 flex items-center justify-center transform rotate-12 z-10 shadow-lg">
+                  ₹599
+                </div>
+              )}
               <CardContent>
-                <ul className="space-y-3">
+                <ul className="space-y-2 sm:space-y-3">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start">
                       <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-300">{feature}</span>
+                      <span className="text-sm sm:text-base text-gray-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
+                
+                {plan.extraInfo && (
+                  <div className="mt-4 bg-black/30 p-3 rounded-lg">
+                    <p className="text-sm text-orange-400 flex items-center">
+                      <span className="mr-1">🔥</span> {plan.extraInfo}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="mt-4">
+                  <p className="text-sm text-gray-300 flex items-center">
+                    <span className="mr-2">📊</span> Monthly Revenue Reports & Music Promotion
+                  </p>
+                  <p className="text-sm text-gray-300 flex items-center mt-2">
+                    <span className="mr-2">📩</span> DM to Get Started! <span className="ml-1 text-blue-400">#SoulOnRepeat</span>
+                  </p>
+                </div>
               </CardContent>
               <CardFooter>
                 <Button 
-                  className={`w-full ${plan.highlight ? 'bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500' : 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500'} border-0`}
+                  className={`w-full text-sm sm:text-base ${plan.highlight ? 'bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500' : 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500'} border-0`}
                   size="lg"
                   asChild
                 >
-                  <Link href="/services">
+                  <Link href="https://wa.me/8291121080" target="_blank" rel="noopener noreferrer">
                     Choose Plan
                   </Link>
                 </Button>
@@ -324,21 +352,21 @@ export default async function HomePage() {
       </section>
       
       {/* Featured Artists Section */}
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
           <Suspense fallback={
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
             </div>
           }>
-          <FeaturedArtists artists={featuredArtists} />
-        </Suspense>
+            <FeaturedArtists artists={featuredArtists} />
+          </Suspense>
         </div>
       </section>
       
       {/* Featured Releases Section */}
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
           <Suspense fallback={
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
@@ -350,112 +378,106 @@ export default async function HomePage() {
       </section>
       
       {/* Distribution Metrics Section */}
-      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-r from-gray-900 via-purple-950/10 to-gray-900 rounded-3xl p-12 shadow-glow-primary border border-gray-800/50">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-gradient">Soul Distribution By The Numbers</h2>
-            <p className="text-xl text-gray-300">Helping independent artists succeed around the world</p>
+      <section className="py-16 sm:py-20 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-r from-gray-900 via-purple-950/10 to-gray-900 rounded-xl sm:rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-12 shadow-glow-primary border border-gray-800/50">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-gradient">Soul Distribution By The Numbers</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-300">Helping independent artists succeed around the world</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center bg-black/30 p-6 rounded-xl">
-              <TrendingUp className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-              <span className="block text-4xl font-bold mb-2">10M+</span>
-              <span className="text-gray-400">Monthly Streams</span>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+              <TrendingUp className="h-8 w-8 sm:h-12 sm:w-12 text-purple-500 mx-auto mb-3 sm:mb-4" />
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">10M+</span>
+              <span className="text-sm sm:text-base text-gray-400">Monthly Streams</span>
             </div>
-            <div className="text-center bg-black/30 p-6 rounded-xl">
-              <Headphones className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-              <span className="block text-4xl font-bold mb-2">150+</span>
-              <span className="text-gray-400">DSP Platforms</span>
+            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+              <Headphones className="h-8 w-8 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">150+</span>
+              <span className="text-sm sm:text-base text-gray-400">DSP Platforms</span>
             </div>
-            <div className="text-center bg-black/30 p-6 rounded-xl">
-              <Music className="h-12 w-12 text-pink-500 mx-auto mb-4" />
-              <span className="block text-4xl font-bold mb-2">5,000+</span>
-              <span className="text-gray-400">Artists</span>
+            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+              <Music className="h-8 w-8 sm:h-12 sm:w-12 text-pink-500 mx-auto mb-3 sm:mb-4" />
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">5,000+</span>
+              <span className="text-sm sm:text-base text-gray-400">Artists</span>
             </div>
-            <div className="text-center bg-black/30 p-6 rounded-xl">
-              <Globe className="h-12 w-12 text-green-500 mx-auto mb-4" />
-              <span className="block text-4xl font-bold mb-2">195</span>
-              <span className="text-gray-400">Countries Reached</span>
+            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+              <Globe className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">195</span>
+              <span className="text-sm sm:text-base text-gray-400">Countries Reached</span>
             </div>
           </div>
         </div>
       </section>
       
-      {/* Playlists Section */}
-      {/* <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <div className="flex items-center mb-8">
-            <div className="h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
-            <h2 className="text-3xl font-bold text-white">Featured Playlists</h2>
-          </div>
-        <SpotifyPlaylistGrid playlists={featuredPlaylists} />
-        </div>
-      </section> */}
-      
       {/* Trending Section */}
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <div className="flex items-center mb-8">
-            <div className="h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
-            <h2 className="text-3xl font-bold text-white">Trending Now</h2>
+      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+          <div className="flex items-center mb-6 sm:mb-8">
+            <div className="h-6 sm:h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Trending Now</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SpotifyPlayer 
-          spotifyUri="5rJZkHvRvichAldYrNUVzi" 
-          type="playlist" 
-          height={380} 
-          theme="0"
-        />
-        <SpotifyPlayer 
-          spotifyUri="5rJZkHvRvichAldYrNUVzi" 
-          type="playlist" 
-          height={380} 
-          theme="0"
-        />
-        <SpotifyPlayer 
-          spotifyUri="5rJZkHvRvichAldYrNUVzi" 
-          type="playlist" 
-          height={380} 
-          theme="0"
-        />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <SpotifyPlayer 
+              spotifyUri="5rJZkHvRvichAldYrNUVzi" 
+              type="playlist" 
+              height={380} 
+              theme="0"
+            />
+            {/* Only show these on larger screens */}
+            <div className="hidden md:block">
+              <SpotifyPlayer 
+                spotifyUri="5rJZkHvRvichAldYrNUVzi" 
+                type="playlist" 
+                height={380} 
+                theme="0"
+              />
+            </div>
+            <div className="hidden md:block">
+              <SpotifyPlayer 
+                spotifyUri="5rJZkHvRvichAldYrNUVzi" 
+                type="playlist" 
+                height={380} 
+                theme="0"
+              />
+            </div>
           </div>
         </div>
       </section>
       
       {/* Videos Section */}
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <div className="flex items-center mb-8">
-            <div className="h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
-            <h2 className="text-3xl font-bold text-white">Featured Videos</h2>
+      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+          <div className="flex items-center mb-6 sm:mb-8">
+            <div className="h-6 sm:h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Featured Videos</h2>
           </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredVideos.map((video) => (
-            <YouTubeEmbed 
-              key={video.id}
-              videoId={video.id}
-              title={video.title}
-            />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            {featuredVideos.map((video) => (
+              <YouTubeEmbed 
+                key={video.id}
+                videoId={video.id}
+                title={video.title}
+              />
+            ))}
           </div>
         </div>
       </section>
       
       {/* CTA Section */}
-      <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-r from-purple-900/40 via-pink-900/30 to-purple-900/40 rounded-3xl p-12 text-center shadow-glow-primary border border-purple-800/20">
-          <h2 className="text-4xl font-bold mb-6 text-gradient">Ready to Share Your Music with the World?</h2>
-          <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
+      <section className="py-16 sm:py-20 md:py-24 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-r from-purple-900/40 via-pink-900/30 to-purple-900/40 rounded-xl sm:rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-12 text-center shadow-glow-primary border border-purple-800/20">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gradient">Ready to Share Your Music with the World?</h2>
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 md:mb-10 max-w-3xl mx-auto">
             Join thousands of independent artists who trust Soul Distribution to get their music heard globally.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500 border-0" asChild>
+            <Button size="lg" className="text-sm sm:text-base bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500 border-0" asChild>
               <Link href="/services">
-                <PlayCircle className="mr-2 h-5 w-5" />
+                <PlayCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Get Started
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-purple-500 text-purple-300 hover:bg-purple-900/30" asChild>
+            <Button size="lg" variant="outline" className="text-sm sm:text-base border-purple-500 text-purple-300 hover:bg-purple-900/30" asChild>
               <Link href="/contact">
                 Contact Us
               </Link>

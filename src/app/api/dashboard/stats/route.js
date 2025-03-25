@@ -25,10 +25,10 @@ export async function GET() {
       aoc: await Artist.countDocuments({ 'plans.type': 'aoc', 'plans.status': 'active' }),
     };
     
-    // Get top 3 artists by follower count
+    // Get top 5 artists by follower count (increased from 3 to 5)
     const popularArtists = await Artist.find({})
-      .sort({ 'spotifyData.followers.total': -1 })
-      .limit(3)
+      .sort({ 'spotifyData.followers': -1 })
+      .limit(5)
       .lean();
       
     const formattedArtists = popularArtists.map(artist => ({
@@ -36,7 +36,7 @@ export async function GET() {
       name: artist.name,
       slug: artist.slug,
       image: artist.image || (artist.spotifyData?.images?.[0]?.url),
-      followers: artist.spotifyData?.followers?.total || 0,
+      followers: artist.spotifyData?.followers || 0,
     }));
     
     return NextResponse.json({
