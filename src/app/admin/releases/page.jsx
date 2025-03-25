@@ -1,16 +1,163 @@
+'use client';
+
 // src/app/admin/releases/page.jsx
-import { Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-export const metadata = {
-  title: 'Manage Releases | Soul Distribution',
-  description: 'Add and manage music releases on your distribution platform',
-};
+import ReleaseForm from '@/components/admin/ReleaseForm';
+import EnvCheck from '@/app/env-check';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+// Helper function to ensure all ObjectId instances are properly serialized
+function ensureString(value) {
+  if (value === null || value === undefined) return '';
+  
+  // Handle string values directly
+  if (typeof value === 'string') return value;
+  
+  // Handle standard ObjectId serialization
+  if (typeof value === 'object') {
+    // Handle MongoDB ObjectId directly
+    if (value._bsontype === 'ObjectID' || value.constructor?.name === 'ObjectID') {
+      return value.toString();
+    }
+    
+    // Handle case where object has both _id and toString (common MongoDB pattern)
+    if (value.id && value.toString && Object.keys(value).length === 2) {
+      return value.toString();
+    }
+    
+    // Handle case where the value is a wrapped ObjectId
+    if (value._id) {
+      return ensureString(value._id);
+    }
+    
+    // Check for toString method
+    if (typeof value.toString === 'function') {
+      const str = value.toString();
+      // If it's not just the default [object Object] string
+      if (str !== '[object Object]') {
+        return str;
+      }
+    }
+    
+    // Handle special case for objects with id property but no _id
+    if (value.id && typeof value.id === 'string') {
+      return value.id;
+    }
+    
+    // Last resort: convert to JSON and log a warning
+    console.warn('Unable to properly stringify object:', value);
+    return JSON.stringify(value);
+  }
+  
+  // For any other type (number, boolean, etc.)
+  return String(value);
+}
+
 export default function AdminReleases() {
+  const [artists, setArtists] = useState([]);
+  const [releases, setReleases] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  // Fetch artists on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch artists
+        const artistsResponse = await fetch('/api/artists');
+        if (!artistsResponse.ok) {
+          throw new Error('Failed to fetch artists');
+        }
+        const artistsData = await artistsResponse.json();
+        setArtists(artistsData.artists || []);
+        
+        // Fetch releases
+        const releasesResponse = await fetch('/api/releases');
+        if (!releasesResponse.ok) {
+          throw new Error('Failed to fetch releases');
+        }
+        const releasesData = await releasesResponse.json();
+        
+        // Debug release data
+        console.log('Raw releases data:', releasesData);
+        
+        // Ensure all releases have string IDs
+        const processedReleases = (releasesData.releases || []).map(release => {
+          // Debug each release
+          console.log('Processing release:', release);
+          console.log('Release _id type:', typeof release._id);
+          
+          // Ensure the _id is a valid string
+          const releaseId = ensureString(release._id);
+          console.log('Processed release ID:', releaseId);
+          
+          return {
+            ...release,
+            _id: releaseId,
+            artists: (release.artists || []).map(artist => {
+              if (typeof artist === 'string') return artist;
+              return {
+                ...artist,
+                _id: ensureString(artist._id)
+              };
+            })
+          };
+        });
+        
+        console.log('Processed releases:', processedReleases);
+        setReleases(processedReleases);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Don't set error state to avoid confusion with form errors
+      }
+    };
+    
+    fetchData();
+  }, [success]); // Refresh when a new release is created
+  
+  // Handle form submission
+  const handleSubmitRelease = async (formData) => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      console.log('Submitting release data:', formData);
+      
+      const response = await fetch('/api/releases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || responseData.message || 'Failed to create release');
+      }
+      
+      setSuccess(`Release "${responseData.title}" created successfully!`);
+      
+      // Reset the form by changing the key
+      // This will cause React to remount the component
+      
+    } catch (err) {
+      console.error('Error creating release:', err);
+      setError(err.message || 'An error occurred while creating the release');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -31,6 +178,21 @@ export default function AdminReleases() {
           </Button>
         </div>
       </div>
+      
+      {/* <EnvCheck /> */}
+      
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {success && (
+        <Alert variant="success" className="bg-green-50 text-green-800 border-green-200">
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
+      
       <Card>
         <CardHeader>
           <CardTitle>All Releases</CardTitle>
@@ -38,9 +200,45 @@ export default function AdminReleases() {
         <CardContent>
           <Suspense fallback={<div>Loading releases...</div>}>
             <div className="grid grid-cols-1 gap-4">
-              <p className="text-sm text-muted-foreground">
-                No releases found. Add your first release to get started.
-              </p>
+              {releases.length > 0 ? (
+                releases.map((release, index) => {
+                  // Debug each release ID before rendering
+                  const releaseId = ensureString(release._id);
+                  const releaseSlug = release.slug || `release-${index}`;
+                  console.log(`Release ${index}:`, { id: releaseId, slug: releaseSlug });
+                  
+                  return (
+                    <div key={`release-${index}`} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={release.coverImage || '/images/placeholder-cover.jpg'} 
+                          alt={release.title}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div>
+                          <h3 className="font-medium">{release.title}</h3>
+                          <p className="text-sm text-gray-500">
+                            {release.artists.map(artist => 
+                              typeof artist === 'string' 
+                                ? artist 
+                                : (artist.name || 'Unknown Artist')
+                            ).join(', ')}
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" asChild>
+                        <Link href={`/admin/releases/${releaseSlug}`}>
+                          Edit
+                        </Link>
+                      </Button>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No releases found. Add your first release to get started.
+                </p>
+              )}
             </div>
           </Suspense>
         </CardContent>
@@ -51,7 +249,17 @@ export default function AdminReleases() {
           <CardContent className="pt-6">
             <Suspense fallback={<div>Loading form...</div>}>
               <div className="space-y-4">
-                <ReleaseForm />
+                <ReleaseForm 
+                  artists={artists} 
+                  onSubmit={handleSubmitRelease}
+                  key={success} // Reset form on successful submission
+                />
+                {loading && (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                    <span className="ml-2">Creating release...</span>
+                  </div>
+                )}
               </div>
             </Suspense>
           </CardContent>
@@ -60,116 +268,3 @@ export default function AdminReleases() {
     </div>
   );
 }
-function ReleaseForm() {
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-              Release Title
-            </label>
-            <Input id="title" placeholder="Release Title" className="mt-1" />
-          </div>
-          <div>
-            <label htmlFor="artist" className="block text-sm font-medium text-gray-700">
-              Artist
-            </label>
-            <Select>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select Artist" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">Add New Artist</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="releaseDate" className="block text-sm font-medium text-gray-700">
-              Release Date
-            </label>
-            <Input id="releaseDate" type="date" className="mt-1" />
-          </div>
-          <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-              Release Type
-            </label>
-            <Select>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="ep">EP</SelectItem>
-                <SelectItem value="album">Album</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            rows={4}
-            placeholder="Release description"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="coverArt" className="block text-sm font-medium text-gray-700">
-            Cover Art
-          </label>
-          <Input id="coverArt" type="file" accept="image/*" className="mt-1" />
-        </div>
-        
-        <div>
-          <label htmlFor="audioFile" className="block text-sm font-medium text-gray-700">
-            Audio File
-          </label>
-          <Input id="audioFile" type="file" accept="audio/*" className="mt-1" />
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="spotifyUrl" className="block text-sm font-medium text-gray-700">
-              Spotify URL
-            </label>
-            <Input id="spotifyUrl" placeholder="https://open.spotify.com/track/..." className="mt-1" />
-          </div>
-          <div>
-            <label htmlFor="youtubeUrl" className="block text-sm font-medium text-gray-700">
-              YouTube URL
-            </label>
-            <Input id="youtubeUrl" placeholder="https://youtube.com/watch?v=..." className="mt-1" />
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Distribution Platforms
-          </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {['Spotify', 'Apple Music', 'YouTube Music', 'Amazon Music', 'Instagram', 'TikTok', 'Resso', 'JioSaavn'].map((platform) => (
-              <div key={platform} className="flex items-center">
-                <input type="checkbox" id={platform} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                <label htmlFor={platform} className="ml-2 text-sm text-gray-700">
-                  {platform}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="flex justify-end gap-4">
-          <Button variant="outline">Cancel</Button>
-          <Button className="bg-purple-600 hover:bg-purple-700">Save Release</Button>
-        </div>
-      </div>
-    );
-  }

@@ -1,126 +1,145 @@
 // src/components/layout/Navbar.jsx
- 'use client'
-import { useState } from 'react';
+'use client'
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Music } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 20;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [scrolled]);
+
+  const navLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/artists', label: 'Artists' },
+    { href: '/releases', label: 'Releases' },
+    { href: '/services', label: 'Services' },
+    { href: '/about', label: 'About' },
+    { href: '/contact', label: 'Contact' },
+  ];
 
   return (
-    <nav className="bg-black text-white sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0">
-              <div className="relative h-10 w-36">
-                <Image
-                  src="/images/logo.svg"
-                  alt="Soul Distribution"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </Link>
-          </div>
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                Home
-              </Link>
-              <Link href="/services" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                Services
-              </Link>
-              <Link href="/artists" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                Artists
-              </Link>
-              <Link href="/releases" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                Releases
-              </Link>
-              <Link href="/about" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                About
-              </Link>
-              <Link href="/contact" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                Contact
-              </Link>
-              <Link 
-                href="/services" 
-                className="px-4 py-2 rounded-md text-sm font-medium bg-orange-600 hover:bg-orange-700"
-              >
-                Get Started
+    <>
+      <nav className={` top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-black/80 backdrop-blur-md shadow-md fixed' : 'bg-transparent'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+                <div className="relative h-10 w-36">
+                  <Image
+                    src="/images/logo.svg"
+                    alt="Soul Distribution"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
               </Link>
             </div>
-          </div>
-          <div className="md:hidden">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:block">
+              <div className="flex space-x-1">
+                {navLinks.map(link => {
+                  const isActive = pathname === link.href;
+                  
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isActive 
+                          ? 'bg-gradient-primary text-white' 
+                          : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Login / Admin Access */}
+            <div className="hidden md:block">
+              <Link 
+                href="/admin" 
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 rounded-full transition-colors"
+              >
+                <Music className="w-4 h-4" />
+                <span>Admin</span>
+              </Link>
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                className="text-gray-300 hover:text-white p-2"
+                onClick={toggleMenu}
+              >
+                {isMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {isMenuOpen && (
-        <div className="md:hidden">
+        
+        {/* Mobile Menu */}
+        <div className={`md:hidden bg-black/90 backdrop-blur-md ${isMenuOpen ? 'block' : 'hidden'}`}>
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {navLinks.map(link => {
+              const isActive = pathname === link.href;
+              
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isActive 
+                      ? 'bg-gradient-primary text-white' 
+                      : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+            
             <Link 
-              href="/" 
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
-              onClick={toggleMenu}
+              href="/admin" 
+              className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white bg-pink-600 hover:bg-pink-700 mt-4"
+              onClick={() => setIsMenuOpen(false)}
             >
-              Home
-            </Link>
-            <Link 
-              href="/services" 
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
-              onClick={toggleMenu}
-            >
-              Services
-            </Link>
-            <Link 
-              href="/artists" 
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
-              onClick={toggleMenu}
-            >
-              Artists
-            </Link>
-            <Link 
-              href="/releases" 
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
-              onClick={toggleMenu}
-            >
-              Releases
-            </Link>
-            <Link 
-              href="/about" 
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
-              onClick={toggleMenu}
-            >
-              About
-            </Link>
-            <Link 
-              href="/contact" 
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
-              onClick={toggleMenu}
-            >
-              Contact
-            </Link>
-            <Link 
-              href="/services" 
-              className="block px-3 py-2 rounded-md text-base font-medium bg-orange-600 hover:bg-orange-700"
-              onClick={toggleMenu}
-            >
-              Get Started
+              <Music className="w-4 h-4" />
+              <span>Admin</span>
             </Link>
           </div>
         </div>
-      )}
-    </nav>
+      </nav>
+      {/* Add increased spacing below the navbar to prevent content overlap */}
+      {/* <div className="h-24 md:h-28"></div> */}
+    </>
   );
 }

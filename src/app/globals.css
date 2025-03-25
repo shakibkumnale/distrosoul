@@ -80,37 +80,50 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Instagram-inspired dark theme with gradient colors */
+  --background: #121212;
+  --foreground: #ffffff;
+  --card: #1e1e1e;
+  --card-foreground: #ffffff;
+  --popover: #1e1e1e;
+  --popover-foreground: #ffffff;
+  
+  /* Pink to Purple gradient primary colors */
+  --primary: #ff3a8c;
+  --primary-foreground: #ffffff;
+  
+  /* Secondary purple */
+  --secondary: #8a3ab9;
+  --secondary-foreground: #ffffff;
+  
+  /* Accent color - blue */
+  --accent: #4c68d7;
+  --accent-foreground: #ffffff;
+  
+  --muted: #2d2d2d;
+  --muted-foreground: #a1a1aa;
+  
+  --destructive: #ff5757;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #8a3ab9;
+  
+  /* Chart colors - stylish gradient colors */
+  --chart-1: #ff3a8c; /* Pink */
+  --chart-2: #8a3ab9; /* Purple */
+  --chart-3: #4c68d7; /* Blue */
+  --chart-4: #bc2a8d; /* Another pink shade */
+  --chart-5: #e95950; /* Orange-red */
+  
+  /* Sidebar styling */
+  --sidebar: #1e1e1e;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ff3a8c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2d2d2d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #8a3ab9;
 }
 
 @layer base {
@@ -119,5 +132,35 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: linear-gradient(135deg, #121212 0%, #1e1b33 100%);
   }
+}
+
+/* Custom gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #ff3a8c 0%, #8a3ab9 50%, #4c68d7 100%);
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #8a3ab9 0%, #4c68d7 100%);
+}
+
+.bg-gradient-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(18, 18, 18, 0.9) 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #ff3a8c 0%, #8a3ab9 50%, #4c68d7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glowing effects for highlights */
+.glow-primary {
+  box-shadow: 0 0 15px rgba(255, 58, 140, 0.3);
+}
+
+.glow-accent {
+  box-shadow: 0 0 15px rgba(76, 104, 215, 0.3);
 }

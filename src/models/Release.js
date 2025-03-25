@@ -14,11 +14,15 @@ const ReleaseSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
-  artist: {
+  artists: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Artist',
-    required: [true, 'Please provide the artist'],
-  },
+    required: [true, 'Please provide at least one artist'],
+  }],
+  featuringArtists: [{
+    name: String,
+    spotifyId: String
+  }],
   coverImage: {
     type: String,
     required: [true, 'Please provide cover image'],
@@ -28,8 +32,19 @@ const ReleaseSchema = new mongoose.Schema({
     required: [true, 'Please provide release date'],
   },
   spotifyUrl: String,
+  spotifyTrackId: String,
+  spotifyAlbumId: String,
+  duration_ms: Number,
+  isrc: String,
+  popularity: Number,
   appleMusicUrl: String,
   youtubeUrl: String,
+  royaltyPercentage: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 100
+  },
   featured: {
     type: Boolean,
     default: false,

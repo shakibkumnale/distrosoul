@@ -1,3 +1,4 @@
+"use client";
 
 // src/components/releases/MediaPlayer.jsx
 import { useState } from 'react';

@@ -1,0 +1,179 @@
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { Music, Play, Disc3, Calendar, ExternalLink, Share2 } from 'lucide-react';
+import MediaPlayer from '@/components/releases/MediaPlayer';
+import { formatDate } from '@/lib/utils';
+
+export default function ReleaseDetails({ release, moreReleases = [] }) {
+  // Extract Spotify URI from URL if available
+  let spotifyUri = '';
+  if (release.spotifyUrl && release.spotifyUrl.includes('track')) {
+    const trackId = release.spotifyUrl.split('track/')[1]?.split('?')[0];
+    if (trackId) {
+      spotifyUri = `spotify:track:${trackId}`;
+    }
+  }
+  
+  // Check if we have artist information
+  const mainArtist = release.artists && release.artists.length > 0 ? release.artists[0] : null;
+  const hasMultipleArtists = release.artists && release.artists.length > 1;
+  
+  return (
+    <main className="py-12 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-8 md:flex-row">
+        {/* Album Cover and Details */}
+        <div className="w-full md:w-1/3">
+          <div className="sticky top-24">
+            <div className="relative aspect-square overflow-hidden rounded-xl shadow-lg">
+              <Image
+                src={release.coverImage || '/images/placeholder-cover.jpg'}
+                alt={release.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+            
+            <div className="mt-6 space-y-4">
+              <div>
+                <h1 className="text-2xl font-bold">{release.title}</h1>
+                {mainArtist && (
+                  <div>
+                    <Link 
+                      href={`/artists/${mainArtist.slug}`} 
+                      className="text-gray-400 hover:text-purple-400 transition-colors"
+                    >
+                      {mainArtist.name}
+                    </Link>
+                    
+                    {hasMultipleArtists && (
+                      <div className="text-sm text-gray-500 mt-1">
+                        featuring {release.artists.slice(1).map(artist => artist.name).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                  <Calendar className="w-3 h-3" />
+                  {formatDate(release.releaseDate)}
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                {release.type && (
+                  <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-purple-900/60 text-purple-300 rounded-full">
+                    <Disc3 className="w-3 h-3" />
+                    {release.type}
+                  </div>
+                )}
+                {release.royaltyPercentage && (
+                  <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-blue-900/60 text-blue-300 rounded-full">
+                    Royalty: {release.royaltyPercentage}%
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                {release.spotifyUrl && (
+                  <Link 
+                    href={release.spotifyUrl} 
+                    target="_blank" 
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-400 bg-green-950 rounded-full hover:bg-green-900 transition-colors"
+                  >
+                    <Music className="w-4 h-4" />
+                    Spotify
+                  </Link>
+                )}
+                
+                {release.appleMusicUrl && (
+                  <Link 
+                    href={release.appleMusicUrl} 
+                    target="_blank" 
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-zinc-800 rounded-full hover:bg-zinc-700 transition-colors"
+                  >
+                    <Music className="w-4 h-4" />
+                    Apple Music
+                  </Link>
+                )}
+                
+                {release.youtubeUrl && (
+                  <Link 
+                    href={release.youtubeUrl} 
+                    target="_blank" 
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-400 bg-red-950 rounded-full hover:bg-red-900 transition-colors"
+                  >
+                    <Play className="w-4 h-4" />
+                    YouTube Music
+                  </Link>
+                )}
+              </div>
+              
+              {/* Share button */}
+              <button 
+                onClick={() => navigator.clipboard.writeText(window.location.href)}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-zinc-800 rounded-full hover:bg-zinc-700 transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                Copy Share Link
+              </button>
+              
+              {/* Admin Edit Link */}
+              <div className="pt-6 border-t border-gray-800">
+                <Link 
+                  href={`/admin/releases/${release.slug}`}
+                  className="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View in admin dashboard
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Media Player and More Releases */}
+        <div className="w-full md:w-2/3 space-y-8">
+          <MediaPlayer 
+            spotifyUri={spotifyUri} 
+            youtubeUrl={release.youtubeUrl} 
+          />
+          
+          {moreReleases.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold">More from {mainArtist?.name || 'This Artist'}</h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {moreReleases.map(rel => {
+                  const relArtist = rel.artists && rel.artists.length > 0 ? rel.artists[0] : null;
+                  return (
+                    <Link 
+                      key={rel._id}
+                      href={`/releases/${rel.slug}`} 
+                      className="group block"
+                    >
+                      <div className="relative overflow-hidden rounded-lg bg-black aspect-square">
+                        <Image
+                          src={rel.coverImage || '/images/placeholder-cover.jpg'}
+                          alt={rel.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <h3 className="mt-2 font-medium text-white group-hover:text-purple-400 truncate transition-colors">
+                        {rel.title}
+                      </h3>
+                      {relArtist && (
+                        <p className="text-sm text-gray-400 truncate">{relArtist.name}</p>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+} 

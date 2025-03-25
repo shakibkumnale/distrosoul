@@ -14,10 +14,10 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <div className="w-64 bg-black text-white h-screen fixed left-0 top-0 py-6 px-4">
+    <div className="w-64 bg-gradient-to-b from-blue-900 to-purple-900 text-white h-screen fixed left-0 top-0 py-6 px-4 shadow-xl">
       <div className="mb-10 px-2">
         <Link href="/" className="flex items-center">
-          <h1 className="text-xl font-bold">Soul Distribution</h1>
+          <h1 className="text-xl font-bold text-white">Soul Distribution</h1>
         </Link>
       </div>
       
@@ -30,12 +30,12 @@ export default function AdminSidebar() {
               href={item.href}
               className={`flex items-center px-3 py-3 rounded-md transition-colors ${
                 isActive
-                  ? 'bg-purple-900 text-white'
-                  : 'text-gray-300 hover:bg-purple-800 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-blue-100 hover:bg-blue-700 hover:text-white'
               }`}
             >
               <span className="mr-3">{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="font-medium">{item.label}</span>
             </Link>
           );
         })}
@@ -44,10 +44,10 @@ export default function AdminSidebar() {
       <div className="absolute bottom-8 left-0 right-0 px-6">
         <Link
           href="/"
-          className="flex items-center px-3 py-3 text-gray-300 hover:bg-purple-800 hover:text-white rounded-md transition-colors"
+          className="flex items-center px-3 py-3 text-blue-100 hover:bg-blue-700 hover:text-white rounded-md transition-colors"
         >
           <span className="mr-3"><LogOut className="w-5 h-5" /></span>
-          <span>Exit Admin</span>
+          <span className="font-medium">Exit Admin</span>
         </Link>
       </div>
     </div>

@@ -11,17 +11,28 @@ async function getReleases() {
     
     const releases = await Release.find({})
       .sort({ releaseDate: -1 })
-      .populate('artist', 'name')
+      .populate('artists', 'name')
       .lean();
     
-    return releases.map(release => ({
-      ...release,
-      _id: release._id.toString(),
-      artist: release.artist._id.toString(),
-      artistName: release.artist.name,
-      createdAt: release.createdAt.toISOString(),
-      releaseDate: release.releaseDate.toISOString(),
-    }));
+    return releases.map(release => {
+      // Add safe check for artists
+      const artistName = release.artists && 
+                         release.artists.length > 0 && 
+                         release.artists[0] && 
+                         release.artists[0].name ? 
+                         release.artists[0].name : 'Unknown Artist';
+      
+      return {
+        ...release,
+        _id: release._id.toString(),
+        artists: Array.isArray(release.artists) ? 
+          release.artists.map(artist => artist && artist._id ? artist._id.toString() : '') 
+          : [],
+        artistName,
+        createdAt: release.createdAt ? release.createdAt.toISOString() : new Date().toISOString(),
+        releaseDate: release.releaseDate ? release.releaseDate.toISOString() : new Date().toISOString(),
+      };
+    });
   } catch (error) {
     console.error('Error fetching releases:', error);
     return [];

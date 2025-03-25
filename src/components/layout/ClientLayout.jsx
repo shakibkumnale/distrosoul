@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/toaster';
 import AdminLayout from '@/app/admin/layout';
 
 export default function ClientLayout({ children, interClassName }) {
@@ -19,12 +19,7 @@ export default function ClientLayout({ children, interClassName }) {
           <Navbar />
           <main>{children}</main>
           <Footer />
-          <Toaster 
-            position="bottom-right"
-            theme="dark"
-            richColors
-            closeButton
-          />
+          <Toaster />
         </>
       )}
     </div>

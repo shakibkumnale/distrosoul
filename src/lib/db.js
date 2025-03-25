@@ -12,7 +12,7 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function connectToDatabase() {
+export async function connectToDatabase() {
   if (cached.conn) {
     return cached.conn;
   }
@@ -20,6 +20,7 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
@@ -31,4 +32,5 @@ async function connectToDatabase() {
   return cached.conn;
 }
 
+// For backward compatibility
 export default connectToDatabase;

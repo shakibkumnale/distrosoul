@@ -1,72 +1,53 @@
 // src/app/artists/[slug]/page.jsx
 import { notFound } from 'next/navigation';
-import ArtistProfile from '@/components/artists/ArtistProfile';
-import connectToDatabase from '@/lib/db';
+import { connectToDatabase } from '@/lib/mongodb';
 import Artist from '@/models/Artist';
 import Release from '@/models/Release';
+import ArtistProfile from '@/components/artists/ArtistProfile';
+import { serializeMongoDB } from '@/lib/utils';
 
-export async function generateStaticParams() {
-  try {
-    await connectToDatabase();
-    const artists = await Artist.find({}).select('slug').lean();
-    
-    return artists.map(artist => ({
-      slug: artist.slug,
-    }));
-  } catch (error) {
-    console.error('Error generating paths:', error);
-    return [];
+export async function generateMetadata({ params }) {
+  await connectToDatabase();
+  const artist = await Artist.findOne({ slug: params.slug });
+  
+  if (!artist) {
+    return {
+      title: 'Artist Not Found',
+    };
   }
+  
+  return {
+    title: `${artist.name} | Soul Distribution`,
+    description: artist.bio || `Official page for ${artist.name}`,
+  };
 }
 
 async function getArtistData(slug) {
-  try {
-    await connectToDatabase();
-    
-    const artist = await Artist.findOne({ slug }).lean();
-    
-    if (!artist) {
-      return null;
-    }
-    
-    const releases = await Release.find({ artist: artist._id })
-      .sort({ releaseDate: -1 })
-      .lean();
-    
-    return {
-      artist: {
-        ...artist,
-        _id: artist._id.toString(),
-        createdAt: artist.createdAt.toISOString(),
-      },
-      releases: releases.map(release => ({
-        ...release,
-        _id: release._id.toString(),
-        artist: release.artist.toString(),
-        artistName: artist.name,
-        createdAt: release.createdAt.toISOString(),
-        releaseDate: release.releaseDate.toISOString(),
-      })),
-    };
-  } catch (error) {
-    console.error('Error fetching artist data:', error);
+  await connectToDatabase();
+  const artist = await Artist.findOne({ slug }).lean();
+  
+  if (!artist) {
     return null;
   }
+  
+  const releases = await Release.find({ artists: artist._id })
+    .sort({ releaseDate: -1 })
+    .lean();
+  
+  console.log(`Found ${releases.length} releases for artist ${artist.name} (ID: ${artist._id})`);
+  
+  return {
+    artist: serializeMongoDB(artist),
+    releases: serializeMongoDB(releases)
+  };
 }
 
 export default async function ArtistPage({ params }) {
-  const { slug } = params;
-  const data = await getArtistData(slug);
+  const data = await getArtistData(params.slug);
   
   if (!data) {
     notFound();
   }
   
-  const { artist, releases } = data;
-  
-  return (
-    <main className="py-12 px-4 md:px-8 max-w-7xl mx-auto">
-      <ArtistProfile artist={artist} releases={releases} />
-    </main>
-  );
+  return <ArtistProfile artist={data.artist} releases={data.releases} />;
 }
