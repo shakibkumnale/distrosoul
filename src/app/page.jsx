@@ -15,9 +15,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Music, Globe, ArrowRight, PlayCircle, ShoppingCart, PieChart, TrendingUp, Headphones, BarChart } from 'lucide-react';
+import { CheckCircle, Music, Globe, ArrowRight, PlayCircle, ShoppingCart, PieChart, TrendingUp, Headphones, BarChart, Users } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import MusicDiscoverySection from '@/components/home/MusicDiscoverySection';
 
 // Sample featured playlists - this would come from the admin panel in production
 // const featuredPlaylists = [
@@ -134,42 +135,49 @@ async function getData() {
   try {
     await connectToDatabase();
     
-    // Get featured artists - remove the limit to fetch all featured artists
-    const featuredArtists = await Artist.find({ featured: true })
+    // Get all featured artists sorted by Spotify followers
+    const popularArtists = await Artist.find({ featured: true })
       .sort({ 'spotifyData.followers': -1 })
       .lean();
     
-    // Get latest releases with featured flag set to true
+    // Get all latest releases without limit
     const latestReleases = await Release.find({ featured: true })
       .sort({ releaseDate: -1 })
-      .limit(8)
-      .populate('artists', 'name')
+      .populate('artists', 'name spotifyArtistId')
+      .lean();
+    
+    // Get all top releases by popularity without limit
+    const topReleases = await Release.find({ featured: true })
+      .sort({ popularity: -1 })
+      .populate('artists', 'name spotifyArtistId')
       .lean();
     
     return {
-      featuredArtists: serializeMongoDB(featuredArtists),
+      popularArtists: serializeMongoDB(popularArtists),
       latestReleases: serializeMongoDB(latestReleases),
+      topReleases: serializeMongoDB(topReleases),
     };
   } catch (error) {
     console.error('Error fetching data:', error);
     return {
-      featuredArtists: [],
+      popularArtists: [],
       latestReleases: [],
+      topReleases: [],
     };
   }
 }
 
 export default async function HomePage() {
-  const { featuredArtists, latestReleases } = await getData();
+  const { popularArtists, latestReleases, topReleases } = await getData();
   
   return (
     <main className="min-h-screen bg-gradient-dark overflow-x-hidden">
       <HeroBanner />
       
-      {/* Distribution Services Section */}
-      <section className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-transparent opacity-50 pointer-events-none"></div>
-        <div className="relative z-10">
+      {/* Distribution Services Section (Odd) */}
+      <section className="w-full py-16 sm:py-20 md:py-28 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent opacity-50 pointer-events-none"></div>
+        <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-gradient">Global Music Distribution</h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
@@ -268,203 +276,243 @@ export default async function HomePage() {
         </div>
       </section>
       
-      {/* Distribution Pricing Plans */}
-      <section className="py-16 sm:py-20 md:py-24 px-4 md:px-8 max-w-7xl mx-auto bg-gradient-to-b from-gray-900 via-purple-950/10 to-gray-900 rounded-xl sm:rounded-2xl md:rounded-3xl my-8 sm:my-12 shadow-glow-primary">
-        <div className="text-center mb-10 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gradient">Distribution Plans</h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-            Choose the perfect plan for your music career, from new artists to established professionals.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          {servicePlans.map((plan, index) => (
-            <Card 
-              key={index} 
-              className={`${plan.highlight ? 'bg-gradient-to-b from-purple-900/40 to-purple-950/60 border-purple-500/50 md:transform md:scale-105 shadow-xl' : 'bg-gradient-to-b from-gray-800/40 to-gray-900/60 border-gray-700/50'} overflow-hidden transition-all duration-300 hover:shadow-purple-900/20 relative`}
-            >
-              <div className={`${plan.name === 'BASIC' ? 'bg-gradient-to-r from-purple-700/70 to-blue-600' : plan.name === 'PRO' ? 'bg-gradient-to-r from-purple-700 to-pink-600' : 'bg-gradient-to-r from-pink-700 to-purple-700'} h-2 w-full`}></div>
-              <CardHeader className="pt-6 sm:pt-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl sm:text-2xl font-bold flex items-center">
-                      {plan.name === 'BASIC' || plan.name === 'PRO' || plan.name === 'PREMIUM' ? (
-                        <span className="text-orange-500 mr-2">🔥</span>
-                      ) : null}
-                      {plan.name}
-                      {plan.name === 'PRO' && <span className="ml-2 text-blue-400">🚀</span>}
-                      {plan.name === 'PREMIUM' && <span className="ml-2">(Maximum Benefits!)</span>}
-                    </CardTitle>
-                    <CardDescription className="text-sm sm:text-base text-gray-300">{plan.description}</CardDescription>
+      {/* Distribution Pricing Plans (Even) */}
+      <section className="w-full py-16 sm:py-20 md:py-24 bg-[#141419] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-950/50 via-[#141419] to-[#141419]"></div>
+        <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gradient">Distribution Plans</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
+              Choose the perfect plan for your music career, from new artists to established professionals.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {servicePlans.map((plan, index) => (
+              <Card 
+                key={index} 
+                className={`${plan.highlight ? 'bg-gradient-to-b from-purple-900/40 to-purple-950/60 border-purple-500/50 md:transform md:scale-105 shadow-xl' : 'bg-gradient-to-b from-gray-800/40 to-gray-900/60 border-gray-700/50'} overflow-hidden transition-all duration-300 hover:shadow-purple-900/20 relative`}
+              >
+                <div className={`${plan.name === 'BASIC' ? 'bg-gradient-to-r from-purple-700/70 to-blue-600' : plan.name === 'PRO' ? 'bg-gradient-to-r from-purple-700 to-pink-600' : 'bg-gradient-to-r from-pink-700 to-purple-700'} h-2 w-full`}></div>
+                <CardHeader className="pt-6 sm:pt-8">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl sm:text-2xl font-bold flex items-center">
+                        {plan.name === 'BASIC' || plan.name === 'PRO' || plan.name === 'PREMIUM' ? (
+                          <span className="text-orange-500 mr-2">🔥</span>
+                        ) : null}
+                        {plan.name}
+                        {plan.name === 'PRO' && <span className="ml-2 text-blue-400">🚀</span>}
+                        {plan.name === 'PREMIUM' && <span className="ml-2">(Maximum Benefits!)</span>}
+                      </CardTitle>
+                      <CardDescription className="text-sm sm:text-base text-gray-300">{plan.description}</CardDescription>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-3 sm:mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
-                  <span className="text-sm sm:text-base text-gray-400 ml-2">{plan.term}</span>
-                </div>
-              </CardHeader>
-              {plan.name === 'PRO' && (
-                <div className="absolute top-2 right-2 bg-white text-black text-lg font-bold rounded-full p-2 w-16 h-16 flex items-center justify-center transform rotate-12 z-10 shadow-lg">
-                  ₹599
-                </div>
-              )}
-              <CardContent>
-                <ul className="space-y-2 sm:space-y-3">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm sm:text-base text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                {plan.extraInfo && (
-                  <div className="mt-4 bg-black/30 p-3 rounded-lg">
-                    <p className="text-sm text-orange-400 flex items-center">
-                      <span className="mr-1">🔥</span> {plan.extraInfo}
-                    </p>
+                  <div className="mt-3 sm:mt-4">
+                    <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
+                    <span className="text-sm sm:text-base text-gray-400 ml-2">{plan.term}</span>
+                  </div>
+                </CardHeader>
+                {plan.name === 'PRO' && (
+                  <div className="absolute top-2 right-2 bg-white text-black text-lg font-bold rounded-full p-2 w-16 h-16 flex items-center justify-center transform rotate-12 z-10 shadow-lg">
+                    ₹599
                   </div>
                 )}
-                
-                <div className="mt-4">
-                  <p className="text-sm text-gray-300 flex items-center">
-                    <span className="mr-2">📊</span> Monthly Revenue Reports & Music Promotion
-                  </p>
-                  <p className="text-sm text-gray-300 flex items-center mt-2">
-                    <span className="mr-2">📩</span> DM to Get Started! <span className="ml-1 text-blue-400">#SoulOnRepeat</span>
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className={`w-full text-sm sm:text-base ${plan.highlight ? 'bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500' : 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500'} border-0`}
-                  size="lg"
-                  asChild
-                >
-                  <Link href="https://wa.me/8291121080" target="_blank" rel="noopener noreferrer">
-                    Choose Plan
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </section>
-      
-      {/* Featured Artists Section */}
-      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <Suspense fallback={
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-            </div>
-          }>
-            <FeaturedArtists artists={featuredArtists} />
-          </Suspense>
-        </div>
-      </section>
-      
-      {/* Featured Releases Section */}
-      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <Suspense fallback={
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-            </div>
-          }>
-            <LatestReleases releases={latestReleases} />
-          </Suspense>
-        </div>
-      </section>
-      
-      {/* Distribution Metrics Section */}
-      <section className="py-16 sm:py-20 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-r from-gray-900 via-purple-950/10 to-gray-900 rounded-xl sm:rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-12 shadow-glow-primary border border-gray-800/50">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-gradient">Soul Distribution By The Numbers</h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-300">Helping independent artists succeed around the world</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
-              <TrendingUp className="h-8 w-8 sm:h-12 sm:w-12 text-purple-500 mx-auto mb-3 sm:mb-4" />
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">10M+</span>
-              <span className="text-sm sm:text-base text-gray-400">Monthly Streams</span>
-            </div>
-            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
-              <Headphones className="h-8 w-8 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">150+</span>
-              <span className="text-sm sm:text-base text-gray-400">DSP Platforms</span>
-            </div>
-            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
-              <Music className="h-8 w-8 sm:h-12 sm:w-12 text-pink-500 mx-auto mb-3 sm:mb-4" />
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">5,000+</span>
-              <span className="text-sm sm:text-base text-gray-400">Artists</span>
-            </div>
-            <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
-              <Globe className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">195</span>
-              <span className="text-sm sm:text-base text-gray-400">Countries Reached</span>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Trending Section */}
-      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <div className="flex items-center mb-6 sm:mb-8">
-            <div className="h-6 sm:h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">Trending Now</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <SpotifyPlayer 
-              spotifyUri="5rJZkHvRvichAldYrNUVzi" 
-              type="playlist" 
-              height={380} 
-              theme="0"
-            />
-            {/* Only show these on larger screens */}
-            <div className="hidden md:block">
-              <SpotifyPlayer 
-                spotifyUri="5rJZkHvRvichAldYrNUVzi" 
-                type="playlist" 
-                height={380} 
-                theme="0"
-              />
-            </div>
-            <div className="hidden md:block">
-              <SpotifyPlayer 
-                spotifyUri="5rJZkHvRvichAldYrNUVzi" 
-                type="playlist" 
-                height={380} 
-                theme="0"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Videos Section */}
-      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-b from-gray-900/80 via-purple-950/5 to-black/60 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
-          <div className="flex items-center mb-6 sm:mb-8">
-            <div className="h-6 sm:h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">Featured Videos</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {featuredVideos.map((video) => (
-              <YouTubeEmbed 
-                key={video.id}
-                videoId={video.id}
-                title={video.title}
-              />
+                <CardContent>
+                  <ul className="space-y-2 sm:space-y-3">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm sm:text-base text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  {plan.extraInfo && (
+                    <div className="mt-4 bg-black/30 p-3 rounded-lg">
+                      <p className="text-sm text-orange-400 flex items-center">
+                        <span className="mr-1">🔥</span> {plan.extraInfo}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-300 flex items-center">
+                      <span className="mr-2">📊</span> Monthly Revenue Reports & Music Promotion
+                    </p>
+                    <p className="text-sm text-gray-300 flex items-center mt-2">
+                      <span className="mr-2">📩</span> DM to Get Started! <span className="ml-1 text-blue-400">#SoulOnRepeat</span>
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className={`w-full text-sm sm:text-base ${plan.highlight ? 'bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-600 hover:to-pink-500' : 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500'} border-0`}
+                    size="lg"
+                    asChild
+                  >
+                    <Link href="https://wa.me/8291121080" target="_blank" rel="noopener noreferrer">
+                      Choose Plan
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Featured Artists Section (Odd) */}
+      <section className="w-full py-12 sm:py-16 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent opacity-50 pointer-events-none"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="bg-black/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+              </div>
+            }>
+              <FeaturedArtists artists={popularArtists} />
+            </Suspense>
+          </div>
+        </div>
+      </section>
+      
+      {/* Featured Releases Section (Even) */}
+      <section className="w-full py-12 sm:py-16 bg-[#141419] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-600/20 via-[#141419] to-[#141419]"></div>
+        <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="bg-black/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+              </div>
+            }>
+              <LatestReleases releases={latestReleases} />
+        </Suspense>
+          </div>
+        </div>
+      </section>
+      
+      {/* Music Discovery Section */}
+      <section className="w-full py-12 sm:py-16 bg-gradient-to-b from-[#141419] via-purple-900/10 to-[#141419] relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-600/10 via-purple-600/10 to-transparent opacity-60"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <MusicDiscoverySection 
+            topReleases={topReleases}
+            popularArtists={popularArtists}
+            latestReleases={latestReleases}
+          />
+        </div>
+      </section>
+      
+      {/* Distribution Metrics Section (Odd) */}
+      <section className="w-full py-16 sm:py-20 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent opacity-50 pointer-events-none"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="bg-gradient-to-r from-gray-900 via-purple-950/10 to-gray-900 rounded-xl sm:rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-12 shadow-glow-primary border border-gray-800/50">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-gradient">Soul Distribution By The Numbers</h2>
+              <p className="text-base sm:text-lg md:text-xl text-gray-300">Helping independent artists succeed around the world</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+              <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+                <TrendingUp className="h-8 w-8 sm:h-12 sm:w-12 text-purple-500 mx-auto mb-3 sm:mb-4" />
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">10M+</span>
+                <span className="text-sm sm:text-base text-gray-400">Monthly Streams</span>
+              </div>
+              <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+                <Headphones className="h-8 w-8 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">150+</span>
+                <span className="text-sm sm:text-base text-gray-400">DSP Platforms</span>
+              </div>
+              <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+                <Music className="h-8 w-8 sm:h-12 sm:w-12 text-pink-500 mx-auto mb-3 sm:mb-4" />
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">5,000+</span>
+                <span className="text-sm sm:text-base text-gray-400">Artists</span>
+              </div>
+              <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
+                <Globe className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">195</span>
+                <span className="text-sm sm:text-base text-gray-400">Countries Reached</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Trending Section (Even) */}
+      <section className="w-full py-12 sm:py-16 bg-[#141419] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-950/50 via-[#141419] to-[#141419]"></div>
+        <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="bg-black/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+            <div className="flex items-center mb-6 sm:mb-8">
+              <div className="h-6 sm:h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">Trending Playlists</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              {/* Hip Hop Hits */}
+              <div className="bg-gradient-to-r from-gray-900/80 via-purple-900/20 to-gray-900/80 rounded-xl overflow-hidden">
+        <SpotifyPlayer 
+                  spotifyUri="spotify:playlist:5rJZkHvRvichAldYrNUVzi" 
+          height={380} 
+        />
+              </div>
+              
+              {/* Fresh Finds */}
+              <div className="hidden md:block bg-gradient-to-r from-gray-900/80 via-purple-900/20 to-gray-900/80 rounded-xl overflow-hidden">
+        <SpotifyPlayer 
+                  spotifyUri="spotify:playlist:37i9dQZF1DX2T5QBkHAjfY" 
+          height={380} 
+        />
+              </div>
+              
+              {/* Soul Vibes */}
+              <div className="hidden md:block bg-gradient-to-r from-gray-900/80 via-purple-900/20 to-gray-900/80 rounded-xl overflow-hidden">
+        <SpotifyPlayer 
+                  spotifyUri="spotify:playlist:37i9dQZF1DWTx0xog3gN3q" 
+          height={380} 
+                />
+              </div>
+            </div>
+            
+            {/* Mobile View - Playlist Navigation */}
+            <div className="flex items-center justify-center mt-6 gap-2 md:hidden">
+              <div className="w-2 h-2 rounded-full bg-purple-600"></div>
+              <div className="w-2 h-2 rounded-full bg-gray-600"></div>
+              <div className="w-2 h-2 rounded-full bg-gray-600"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Videos Section (Odd) */}
+      <section className="w-full py-12 sm:py-16 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent opacity-50 pointer-events-none"></div>
+        <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="bg-black/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-sm border border-gray-800/50">
+            <div className="flex items-center mb-6 sm:mb-8">
+              <div className="h-6 sm:h-8 w-1 bg-purple-600 rounded-full mr-3"></div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">Featured Videos</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {featuredVideos.map((video) => (
+            <YouTubeEmbed 
+              key={video.id}
+              videoId={video.id}
+              title={video.title}
+            />
+          ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      
+    
+       <section className="py-16 sm:py-20 md:py-24 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="bg-gradient-to-r from-purple-900/40 via-pink-900/30 to-purple-900/40 rounded-xl sm:rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-12 text-center shadow-glow-primary border border-purple-800/20">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gradient">Ready to Share Your Music with the World?</h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 md:mb-10 max-w-3xl mx-auto">

@@ -84,23 +84,23 @@ export default function AdminDashboard() {
                   className="flex items-center gap-4 p-4 mb-3 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all hover:shadow-md"
                 >
                   <div className="font-bold text-xl text-white bg-purple-600 dark:bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    {index + 1}
-                  </div>
+                        {index + 1}
+                      </div>
                   <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-purple-300 dark:border-purple-600">
                     {artist.image ? (
-                      <Image 
+                        <Image
                         src={artist.image} 
-                        alt={artist.name}
+                          alt={artist.name}
                         width={56}
                         height={56}
-                        className="object-cover"
-                      />
+                          className="object-cover"
+                        />
                     ) : (
                       <div className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
                         <User className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                       </div>
                     )}
-                  </div>
+                      </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900 dark:text-white truncate">{artist.name}</h3>
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -112,9 +112,9 @@ export default function AdminDashboard() {
                     href={`/admin/artists/${artist.slug}`}
                     className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md text-sm font-medium hover:from-purple-700 hover:to-blue-700 transition-colors flex-shrink-0"
                   >
-                    View Details
-                  </Link>
-                </div>
+                        View Details
+                      </Link>
+                    </div>
               ))
             ) : (
               <div className="text-center py-10 text-gray-500 dark:text-gray-400">
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-purple-700 dark:text-purple-400 mb-6">Plans Distribution</h2>
           
-          <div className="space-y-4">
+            <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
                 <div className="h-4 w-4 rounded-full bg-blue-500 mr-3"></div>
@@ -150,13 +150,13 @@ export default function AdminDashboard() {
                 <span className="text-gray-700 dark:text-gray-200">Premium</span>
               </div>
               <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">{stats.planCounts?.premium || 0}</span>
-            </div>
+                  </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center">
                 <div className="h-4 w-4 rounded-full bg-orange-500 mr-3"></div>
                 <span className="text-gray-700 dark:text-gray-200">Aoc</span>
-              </div>
+                </div>
               <span className="font-bold text-gray-900 dark:text-white px-3 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-full">{stats.planCounts?.aoc || 0}</span>
             </div>
             

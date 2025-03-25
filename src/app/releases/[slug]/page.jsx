@@ -47,15 +47,15 @@ export async function generateMetadata({ params }) {
 }
 
 async function getReleaseData(slug) {
-  await connectToDatabase();
+    await connectToDatabase();
   const release = await Release.findOne({ slug })
     .populate('artists')
     .lean();
-
-  if (!release) {
-    return null;
-  }
-
+    
+    if (!release) {
+      return null;
+    }
+    
   // Get artist from the populated artists array
   const artist = release.artists && release.artists.length > 0 ? release.artists[0] : null;
 
@@ -64,15 +64,15 @@ async function getReleaseData(slug) {
   if (artist) {
     moreReleases = await Release.find({
       artists: artist._id,
-      _id: { $ne: release._id }
+      _id: { $ne: release._id } 
     })
       .sort({ releaseDate: -1 })
       .limit(4)
       .populate('artists')
       .lean();
   }
-
-  return {
+    
+    return {
     release: serializeMongoDB(release),
     moreReleases: serializeMongoDB(moreReleases)
   };
@@ -80,10 +80,10 @@ async function getReleaseData(slug) {
 
 export default async function ReleasePage({ params }) {
   const data = await getReleaseData(params.slug);
-
+  
   if (!data) {
     notFound();
   }
-
+  
   return <ReleaseDetails release={data.release} moreReleases={data.moreReleases} />;
 }
