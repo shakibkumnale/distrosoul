@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
@@ -205,7 +209,3 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;

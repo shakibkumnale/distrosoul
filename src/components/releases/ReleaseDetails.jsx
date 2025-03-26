@@ -144,11 +144,11 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
             <div className="space-y-4">
               <h2 className="text-xl font-bold">More from {mainArtist?.name || 'This Artist'}</h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {moreReleases.map(rel => {
+                {moreReleases.map((rel) => {
                   const relArtist = rel.artists && rel.artists.length > 0 ? rel.artists[0] : null;
                   return (
                     <Link 
-                      key={rel._id}
+                      key={rel._id ? rel._id.toString() : `release-${rel.title}`}
                       href={`/releases/${rel.slug}`} 
                       className="group block"
                     >

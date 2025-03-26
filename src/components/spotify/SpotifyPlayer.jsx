@@ -39,18 +39,18 @@ const SpotifyPlayer = ({ spotifyUri, height = 80, theme }) => {
       break;
     default:
       return null;
-  }
-
+    }
+  
   return (
     <div className="w-full rounded-lg overflow-hidden shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
-      <iframe
+        <iframe
         src={`${embedUrl}?utm_source=generator&theme=${theme}`}
-        width="100%"
-        height={height}
-        frameBorder="0"
+          width="100%"
+          height={height}
+          frameBorder="0"
         allowFullScreen
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
         className="bg-transparent"
       />
     </div>

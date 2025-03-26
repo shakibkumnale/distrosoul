@@ -33,8 +33,8 @@ export default function PublicReleasesTable({ releases }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {releases.map((release) => (
-            <TableRow key={release._id}>
+          {releases.map((release, index) => (
+            <TableRow key={release._id ? release._id.toString() : `release-${index}`}>
               <TableCell>
                 {release.coverImage && (
                   <Image 
@@ -42,7 +42,7 @@ export default function PublicReleasesTable({ releases }) {
                     alt={release.title}
                     width={50}
                     height={50}
-                    className="rounded-sm"
+                    className="rounded-md"
                   />
                 )}
               </TableCell>

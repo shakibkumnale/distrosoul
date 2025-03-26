@@ -193,12 +193,12 @@ export default function FeaturedArtists({ artists: initialArtists = [] }) {
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
+          </div>
         </div>
-      </div>
         
-      <div 
+        <div 
         className="overflow-x-auto scrollbar-none" 
-        ref={scrollRef}
+          ref={scrollRef}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <style jsx global>{`
@@ -208,17 +208,17 @@ export default function FeaturedArtists({ artists: initialArtists = [] }) {
         `}</style>
         <div className="flex space-x-4 sm:space-x-6 pb-4 sm:pb-6 min-w-max">
           {filteredArtists().map((artist, index) => (
-            <Link 
+              <Link 
               key={getArtistKey(artist, index)}
-              href={`/artists/${artist.slug}`}
+                href={`/artists/${artist.slug}`}
               className="block group relative"
-            >
+              >
               <div className="w-36 sm:w-44 md:w-52 bg-gradient-to-b from-gray-800/60 to-gray-900/80 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-purple-900/20 group-hover:scale-[1.02]">
                 <div className="relative w-full h-36 sm:h-44 md:h-52 overflow-hidden">
-                  <Image 
-                    src={artist.image || (artist.spotifyData?.images?.[0]?.url) || '/images/placeholder-cover.jpg'} 
-                    alt={artist.name}
-                    fill
+                    <Image 
+                      src={artist.image || (artist.spotifyData?.images?.[0]?.url) || '/images/placeholder-cover.jpg'} 
+                      alt={artist.name}
+                      fill
                     sizes="(max-width: 640px) 144px, (max-width: 768px) 176px, 208px"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -257,20 +257,20 @@ export default function FeaturedArtists({ artists: initialArtists = [] }) {
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
         
       <div className="text-center mt-6 sm:mt-10">
-        <Link 
-          href="/artists" 
+          <Link 
+            href="/artists" 
           className="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white text-sm sm:text-base font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-purple-900/30"
-        >
-          View All Artists
+          >
+            View All Artists
           <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-1.5 sm:ml-2" />
-        </Link>
+          </Link>
+        </div>
       </div>
-    </div>
   );
 }

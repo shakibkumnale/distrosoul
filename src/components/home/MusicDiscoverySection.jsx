@@ -21,7 +21,7 @@ export default function MusicDiscoverySection({ topReleases, popularArtists, lat
         >
           <div className="space-y-4">
             {topReleases.sort((a, b) => b.popularity - a.popularity).map((release, index) => (
-              <div key={`top-release-${index}-${release._id.toString()}`} className="relative">
+              <div key={`top-release-${index}-${release._id ? release._id.toString() : index}`} className="relative">
                 <SpotifyPlayer
                   spotifyUri={`spotify:track:${release.spotifyTrackId}`}
                   height={100}
@@ -40,7 +40,7 @@ export default function MusicDiscoverySection({ topReleases, popularArtists, lat
         </div>
         <div className="space-y-4">
           {popularArtists.slice(0, 3).map((artist, index) => (
-            <div key={`featured-artist-${index}-${artist._id.toString()}`} className="relative">
+            <div key={`featured-artist-${index}-${artist._id ? artist._id.toString() : index}`} className="relative">
               <SpotifyPlayer
                 spotifyUri={`spotify:artist:${artist.spotifyArtistId}`}
                 height={160}
@@ -66,7 +66,7 @@ export default function MusicDiscoverySection({ topReleases, popularArtists, lat
         >
           <div className="space-y-4">
             {latestReleases.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)).map((release, index) => (
-              <div key={`latest-release-${index}-${release._id.toString()}`} className="relative">
+              <div key={`latest-release-${index}-${release._id ? release._id.toString() : index}`} className="relative">
                 <SpotifyPlayer
                   spotifyUri={`spotify:track:${release.spotifyTrackId}`}
                   height={100}

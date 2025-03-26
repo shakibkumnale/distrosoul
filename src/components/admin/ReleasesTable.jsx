@@ -78,8 +78,8 @@ export default function ReleasesTable({ releases }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {releases.map((release) => (
-            <TableRow key={release._id}>
+          {releases.map((release, index) => (
+            <TableRow key={release._id ? release._id.toString() : `release-${index}`}>
               <TableCell>
                 {release.coverImage && (
                   <Image 

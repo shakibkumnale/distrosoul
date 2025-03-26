@@ -80,7 +80,7 @@ export default function AdminDashboard() {
             {stats.popularArtists && stats.popularArtists.length > 0 ? (
               stats.popularArtists.map((artist, index) => (
                 <div 
-                  key={artist._id} 
+                  key={artist._id ? artist._id.toString() : `artist-${artist.name}`}
                   className="flex items-center gap-4 p-4 mb-3 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all hover:shadow-md"
                 >
                   <div className="font-bold text-xl text-white bg-purple-600 dark:bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -110,6 +110,7 @@ export default function AdminDashboard() {
                   </div>
                   <Link
                     href={`/admin/artists/${artist.slug}`}
+                    key={artist._id ? artist._id.toString() : `artist-${artist.name}`}
                     className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md text-sm font-medium hover:from-purple-700 hover:to-blue-700 transition-colors flex-shrink-0"
                   >
                         View Details

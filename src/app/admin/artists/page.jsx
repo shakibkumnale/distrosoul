@@ -147,7 +147,10 @@ export default function AdminArtists() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredArtists.map((artist) => (
-                  <div key={artist._id} className="border rounded-lg p-4">
+                  <div 
+                    key={artist._id ? artist._id.toString() : `artist-${artist.name}`} 
+                    className="border rounded-lg p-4"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-4">
                         <div className="relative h-12 w-12 rounded-full overflow-hidden">

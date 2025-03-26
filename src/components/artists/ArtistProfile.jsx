@@ -8,13 +8,13 @@ import { CheckCircle, Music, Youtube, Instagram, ListMusic, Grid, List } from 'l
 import ReleasesGrid from '../releases/ReleasesGrid';
 import PublicReleasesTable from '../releases/PublicReleasesTable';
 import SpotifyPlayer from '../spotify/SpotifyPlayer';
-import SpotifyArtistProfile from '../spotify/SpotifyArtistProfile';
 import SpotifyPlaylistGrid from '../spotify/SpotifyPlaylistGrid';
 import YouTubeEmbed from '../youtube/YouTubeEmbed';
 
 export default function ArtistProfile({ artist, releases = [] }) {
   const [activeTab, setActiveTab] = useState('releases');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+  const [musicSubTab, setMusicSubTab] = useState('profile'); // 'profile', 'playlists'
   
   // Debug releases data
   useEffect(() => {
@@ -40,6 +40,19 @@ export default function ArtistProfile({ artist, releases = [] }) {
     { id: 'music', label: 'Music', show: artist.spotifyArtistId || formattedPlaylists.length > 0 },
     { id: 'videos', label: 'Videos', show: artist.youtubeVideos?.length > 0 }
   ].filter(tab => tab.show !== false);
+
+  // Music subtabs
+  const musicSubTabs = [
+    { id: 'profile', label: 'Artist Profile', icon: <Music className="w-4 h-4" />, show: artist.spotifyArtistId },
+    { id: 'playlists', label: 'Playlists', icon: <ListMusic className="w-4 h-4" />, show: formattedPlaylists.length > 0 }
+  ].filter(tab => tab.show);
+
+  // Set default music subtab based on what's available
+  useEffect(() => {
+    if (activeTab === 'music' && musicSubTabs.length > 0 && !musicSubTabs.find(tab => tab.id === musicSubTab)) {
+      setMusicSubTab(musicSubTabs[0].id);
+    }
+  }, [activeTab, musicSubTabs, musicSubTab]);
 
   return (
     <div className="container mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-10">
@@ -170,26 +183,60 @@ export default function ArtistProfile({ artist, releases = [] }) {
         )}
         
         {activeTab === 'music' && (
-          <div className="space-y-10">
-            {artist.spotifyArtistId && (
-              <div className="space-y-4 bg-black/30 rounded-xl p-6 backdrop-blur-sm">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Music className="w-5 h-5 text-green-400" />
-                  Top Tracks
-                </h2>
-                <SpotifyArtistProfile artistId={artist.spotifyArtistId} />
+          <div className="space-y-6">
+            {/* Music Subtabs */}
+            {musicSubTabs.length > 1 && (
+              <div className="flex border-b border-zinc-800">
+                {musicSubTabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${
+                      musicSubTab === tab.id 
+                        ? 'text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-lg' 
+                        : 'text-gray-400 hover:text-white hover:bg-black/20'
+                    }`}
+                    onClick={() => setMusicSubTab(tab.id)}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
               </div>
             )}
             
-            {formattedPlaylists.length > 0 && (
-              <div className="space-y-4 bg-black/30 rounded-xl p-6 backdrop-blur-sm">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <ListMusic className="w-5 h-5 text-green-400" />
-                  Playlists
-                </h2>
-                <SpotifyPlaylistGrid playlists={formattedPlaylists} />
-              </div>
-            )}
+            {/* Music Content based on subtab */}
+            <div className="bg-black/30 rounded-xl p-6 backdrop-blur-sm">
+              {musicSubTab === 'profile' && artist.spotifyArtistId && (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <Music className="w-5 h-5 text-green-400" />
+                    Artist Profile
+                  </h2>
+                  <div className="w-full h-[380px] rounded-lg overflow-hidden">
+                    <iframe 
+                      src={`https://open.spotify.com/embed/artist/${artist.spotifyArtistId}?utm_source=generator`}
+                      width="100%" 
+                      height="380" 
+                      frameBorder="0" 
+                      allowFullScreen
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                      loading="lazy"
+                      className="bg-transparent"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+              
+              {musicSubTab === 'playlists' && formattedPlaylists.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <ListMusic className="w-5 h-5 text-green-400" />
+                    Playlists
+                  </h2>
+                  <SpotifyPlaylistGrid playlists={formattedPlaylists} />
+                </div>
+              )}
+            </div>
           </div>
         )}
         
