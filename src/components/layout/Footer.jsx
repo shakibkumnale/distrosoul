@@ -13,13 +13,13 @@ export default function Footer() {
               Empowering independent artists with global music distribution and YouTube OAC services.
             </p>
             <div className="flex space-x-4 mt-4">
-              <a href="https://instagram.com/souldistribution" className="text-gray-400 hover:text-white">
+              <a href="https://instagram.com/souldistribution_" className="text-gray-400 hover:text-white">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com/souldistribution" className="text-gray-400 hover:text-white">
+              <a href="https://twitter.com/souldistribution_" className="text-gray-400 hover:text-white">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://youtube.com/souldistribution" className="text-gray-400 hover:text-white">
+              <a href="https://youtube.com/@3in1soulrap" className="text-gray-400 hover:text-white">
                 <Youtube className="h-5 w-5" />
               </a>
             </div>

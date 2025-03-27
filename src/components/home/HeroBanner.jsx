@@ -21,7 +21,7 @@ export default function HeroBanner() {
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
             <span className="block">Get Your Music</span>
-            <span className="block text-orange-500">To The World</span>
+            <span className="block text-purple-700 ">To The World</span>
           </h1>
           <p className="text-xl text-gray-300 mb-8">
             Distribute your music to 150+ Indian & International platforms. 
@@ -30,7 +30,7 @@ export default function HeroBanner() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               href="/services" 
-              className="px-6 py-3 bg-orange-600 text-white font-medium rounded-md hover:bg-orange-700 transition-colors"
+              className="px-6 py-3 bg-gradient-primary text-white font-medium rounded-md  transition-colors"
             >
               View Plans
             </Link>

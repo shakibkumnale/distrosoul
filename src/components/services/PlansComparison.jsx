@@ -31,6 +31,26 @@ const PlansComparison = ({ plans }) => {
     ) {
       return true;
     }
+
+    // Special cases for OAC plan
+    if (plan.id === 'youtube-oac' && [
+      'Distribution to 150+ Stores',
+      'Spotify Verification',
+      'Content ID',
+      'Playlist Pitching',
+      'Instagram Audio Linking',
+      '24/7 Support'
+    ].includes(feature)) {
+      return true;
+    }
+
+    // Special cases for all plans except OAC
+    if (plan.id !== 'youtube-oac' && [
+      'Distribution to 150+ Stores',
+      'Instagram Audio Linking'
+    ].includes(feature)) {
+      return true;
+    }
     
     // General check against the features list
     return plan.features.some(f => f.toLowerCase().includes(feature.toLowerCase()));

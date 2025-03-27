@@ -63,7 +63,7 @@ export default function ReleasesGrid({ releases = [], className = '' }) {
               <div className="flex gap-2">
                 {release.spotifyUrl && (
                   <Link 
-                    href={release.spotifyUrl} 
+                  href={`https://open.spotify.com/track/${release.spotifyUrl}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white font-medium hover:bg-green-500 transition-colors"

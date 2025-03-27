@@ -8,13 +8,7 @@ import { formatDate } from '@/lib/utils';
 
 export default function ReleaseDetails({ release, moreReleases = [] }) {
   // Extract Spotify URI from URL if available
-  let spotifyUri = '';
-  if (release.spotifyUrl && release.spotifyUrl.includes('track')) {
-    const trackId = release.spotifyUrl.split('track/')[1]?.split('?')[0];
-    if (trackId) {
-      spotifyUri = `spotify:track:${trackId}`;
-    }
-  }
+
   
   // Check if we have artist information
   const mainArtist = release.artists && release.artists.length > 0 ? release.artists[0] : null;
@@ -33,7 +27,9 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                 fill
                 className="object-cover"
                 priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
               />
+              
             </div>
             
             <div className="mt-6 space-y-4">
@@ -50,7 +46,7 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                     
                     {hasMultipleArtists && (
                       <div className="text-sm text-gray-500 mt-1">
-                        featuring {release.artists.slice(1).map(artist => artist.name).join(', ')}
+                        featuring  {release.artists.slice(1).map(artist => artist.name).join(', ')}
                       </div>
                     )}
                   </div>
@@ -68,17 +64,13 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                     {release.type}
                   </div>
                 )}
-                {release.royaltyPercentage && (
-                  <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-blue-900/60 text-blue-300 rounded-full">
-                    Royalty: {release.royaltyPercentage}%
-                  </div>
-                )}
+              
               </div>
               
               <div className="flex flex-wrap gap-3">
                 {release.spotifyUrl && (
                   <Link 
-                    href={release.spotifyUrl} 
+                    href={`https://open.spotify.com/track/${release.spotifyUrl}`} 
                     target="_blank" 
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-400 bg-green-950 rounded-full hover:bg-green-900 transition-colors"
                   >
@@ -119,16 +111,7 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                 Copy Share Link
               </button>
               
-              {/* Admin Edit Link */}
-              <div className="pt-6 border-t border-gray-800">
-                <Link 
-                  href={`/admin/releases/${release.slug}`}
-                  className="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  View in admin dashboard
-                </Link>
-              </div>
+            
             </div>
           </div>
         </div>
@@ -136,7 +119,7 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
         {/* Media Player and More Releases */}
         <div className="w-full md:w-2/3 space-y-8">
           <MediaPlayer 
-            spotifyUri={spotifyUri} 
+            spotifyUri={release.spotifyTrackId}
             youtubeUrl={release.youtubeUrl} 
           />
           

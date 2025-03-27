@@ -82,7 +82,8 @@ export default function ArtistProfile({ artist, releases = [] }) {
             <div className="flex flex-wrap gap-3 pt-2">
               {artist.spotifyUrl && (
                 <Link 
-                  href={artist.spotifyUrl} 
+                  href={`https://open.spotify.com/artist/${artist.spotifyUrl}`} 
+
                   target="_blank" 
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-green-400 bg-green-950 rounded-full hover:bg-green-900 transition-colors"
                 >

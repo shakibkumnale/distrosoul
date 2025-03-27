@@ -51,11 +51,11 @@ import MusicDiscoverySection from '@/components/home/MusicDiscoverySection';
 // Sample featured YouTube videos - this would come from the admin panel in production
 const featuredVideos = [
   {
-    id: 'dQw4w9WgXcQ', // Replace with actual video ID
+    id: 'kXTJMtV8Mnc', // Replace with actual video ID
     title: 'Featured Artist - Music Video'
   },
   {
-    id: 'uIRLnHHFgj4', // Replace with actual video ID
+    id: '8JHjwwZSp6Q', // Replace with actual video ID
     title: 'Behind The Scenes'
   }
 ];
@@ -85,7 +85,7 @@ const servicePlans = [
       'Content ID & Playlist Pitching',
       'Instagram Audio Page Linking',
       '24/7 Support | Approval in 24H | Live in 2 Days',
-      'Lifetime Availability – No Hidden Fees!'
+      'Lifetime Availability '
     ],
     highlight: false,
     color: 'bg-purple-600',
@@ -122,7 +122,7 @@ const servicePlans = [
       'Content ID & Playlist Pitching',
       'Instagram Audio Page Linking',
       '24/7 Support | Approval in 24H | Live in 2 Days',
-      'Lifetime Availability – No Hidden Fees!'
+      'Lifetime Availability'
     ],
     highlight: false,
     color: 'bg-pink-600',
@@ -134,6 +134,12 @@ const servicePlans = [
 async function getData() {
   try {
     await connectToDatabase();
+    
+    // Get total number of releases
+    const totalReleases = await Release.countDocuments();
+    
+    // Get total number of artists
+    const totalArtists = await Artist.countDocuments();
     
     // Get all featured artists sorted by Spotify followers
     const popularArtists = await Artist.find({ featured: true })
@@ -156,6 +162,10 @@ async function getData() {
       popularArtists: serializeMongoDB(popularArtists),
       latestReleases: serializeMongoDB(latestReleases),
       topReleases: serializeMongoDB(topReleases),
+      metrics: {
+        totalReleases,
+        totalArtists
+      }
     };
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -163,12 +173,16 @@ async function getData() {
       popularArtists: [],
       latestReleases: [],
       topReleases: [],
+      metrics: {
+        totalReleases: 0,
+        totalArtists: 0
+      }
     };
   }
 }
 
 export default async function HomePage() {
-  const { popularArtists, latestReleases, topReleases } = await getData();
+  const { popularArtists, latestReleases, topReleases, metrics } = await getData();
   
   return (
     <main className="min-h-screen bg-gradient-dark overflow-x-hidden">
@@ -418,10 +432,13 @@ export default async function HomePage() {
               <p className="text-base sm:text-lg md:text-xl text-gray-300">Helping independent artists succeed around the world</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+              
               <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
-                <TrendingUp className="h-8 w-8 sm:h-12 sm:w-12 text-purple-500 mx-auto mb-3 sm:mb-4" />
-                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">10M+</span>
-                <span className="text-sm sm:text-base text-gray-400">Monthly Streams</span>
+                <Music className="h-8 w-8 sm:h-12 sm:w-12 text-purple-500 mx-auto mb-3 sm:mb-4" />
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">
+                  {metrics.totalReleases}+
+                </span>
+                <span className="text-sm sm:text-base text-gray-400">Total Releases</span>
               </div>
               <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
                 <Headphones className="h-8 w-8 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
@@ -429,9 +446,11 @@ export default async function HomePage() {
                 <span className="text-sm sm:text-base text-gray-400">DSP Platforms</span>
               </div>
               <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
-                <Music className="h-8 w-8 sm:h-12 sm:w-12 text-pink-500 mx-auto mb-3 sm:mb-4" />
-                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">5,000+</span>
-                <span className="text-sm sm:text-base text-gray-400">Artists</span>
+                <Users className="h-8 w-8 sm:h-12 sm:w-12 text-pink-500 mx-auto mb-3 sm:mb-4" />
+                <span className="block text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">
+                  {metrics.totalArtists}+
+                </span>
+                <span className="text-sm sm:text-base text-gray-400">Active Artists</span>
               </div>
               <div className="text-center bg-black/30 p-4 sm:p-6 rounded-lg sm:rounded-xl">
                 <Globe className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
@@ -474,7 +493,6 @@ export default async function HomePage() {
               <div className="hidden md:block bg-gradient-to-r from-gray-900/80 via-purple-900/20 to-gray-900/80 rounded-xl overflow-hidden">
         <SpotifyPlayer 
                   spotifyUri="spotify:playlist:37i9dQZF1DWTx0xog3gN3q" 
-          height={380} 
                 />
               </div>
             </div>

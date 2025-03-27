@@ -42,19 +42,22 @@ export default function MediaPlayer({
           onClick={() => setCurrentTab('youtube')}
         >
           YouTube
+          
         </button>
       </div>
       
-      <div className="aspect-video w-full">
-        {currentTab === 'spotify' && spotifyUri ? (
+      <div className="aspect-video w-full p-4">
+        
+        {currentTab === 'spotify' && true ? (
           <iframe
-            src={`https://open.spotify.com/embed/track/${spotifyUri.split(':')[2]}?utm_source=generator&theme=0`}
+            src={`https://open.spotify.com/embed/track/${spotifyUri}?utm_source=generator`}
             width="100%"
             height="100%"
             allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
           ></iframe>
+          
         ) : currentTab === 'youtube' && youtubeUrl ? (
           <iframe
             src={youtubeUrl.replace('watch?v=', 'embed/')}
@@ -71,29 +74,7 @@ export default function MediaPlayer({
         )}
       </div>
       
-      <div className="flex items-center justify-between px-4 py-2">
-        <button 
-          onClick={togglePlay}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700"
-        >
-          {isPlaying ? (
-            <Pause className="w-4 h-4" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
-        </button>
-        
-        <button 
-          onClick={toggleMute}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700"
-        >
-          {isMuted ? (
-            <VolumeX className="w-4 h-4" />
-          ) : (
-            <Volume2 className="w-4 h-4" />
-          )}
-        </button>
-      </div>
+      
     </div>
   );
 }
