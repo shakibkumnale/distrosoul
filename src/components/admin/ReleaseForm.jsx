@@ -75,6 +75,7 @@ export default function ReleaseForm({ initialData, artists, onSubmit, spotifyDat
     royaltyPercentage: 100,
     isrc: '',
     duration_ms: 0,
+    landrTrackId: '',
   });
   
   const [isLoading, setIsLoading] = useState(false);
@@ -128,6 +129,12 @@ export default function ReleaseForm({ initialData, artists, onSubmit, spotifyDat
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Log landrTrackId changes to debug
+    if (name === 'landrTrackId') {
+      console.log('Updating landrTrackId:', value);
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -414,6 +421,7 @@ export default function ReleaseForm({ initialData, artists, onSubmit, spotifyDat
       
       // Log the submission data for debugging
       console.log('Submitting release with artists:', submissionData.artists);
+      console.log('landrTrackId value being submitted:', submissionData.landrTrackId);
       
       // Submit the form
       await onSubmit(submissionData);
@@ -468,6 +476,8 @@ export default function ReleaseForm({ initialData, artists, onSubmit, spotifyDat
         ...processedData,
         slug: generateSlug(processedData.title),
         royaltyPercentage: 100,
+        // Preserve the existing landrTrackId if it exists
+        landrTrackId: prev.landrTrackId || '',
       }));
       
       // Store Spotify artists
@@ -795,6 +805,20 @@ export default function ReleaseForm({ initialData, artists, onSubmit, spotifyDat
             value={formData.royaltyPercentage || 100}
             onChange={handleChange}
               className="mt-1"
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="landrTrackId">Landr Track ID</Label>
+          <Input
+            id="landrTrackId"
+            name="landrTrackId"
+            value={formData.landrTrackId || ''}
+            onChange={handleChange}
+            className="mt-1"
+            placeholder="Enter Landr Track ID"
           />
         </div>
       </div>

@@ -93,13 +93,21 @@ export default function AdminReleaseEdit({ params }) {
   const handleSubmit = async (formData) => {
     setSubmitting(true);
     try {
+      // Ensure landrTrackId is included in the submission data
+      console.log('Form data to submit:', formData);
+      console.log('landrTrackId in form data:', formData.landrTrackId);
+      
       const releaseId = ensureString(release._id);
       const response = await fetch(`/api/releases/${releaseId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          // Explicitly include the landrTrackId to ensure it's sent
+          landrTrackId: formData.landrTrackId || ''
+        }),
       });
       
       if (!response.ok) {

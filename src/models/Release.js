@@ -34,6 +34,7 @@ const ReleaseSchema = new mongoose.Schema({
   spotifyUrl: String,
   spotifyTrackId: String,
   spotifyAlbumId: String,
+  landrTrackId: String,
   duration_ms: Number,
   isrc: String,
   popularity: Number,

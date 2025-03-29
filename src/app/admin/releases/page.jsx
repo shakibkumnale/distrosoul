@@ -130,13 +130,20 @@ export default function AdminReleases() {
     
     try {
       console.log('Submitting release data:', formData);
+      console.log('landrTrackId in new release data:', formData.landrTrackId);
+      
+      // Ensure landrTrackId is explicitly included
+      const submissionData = {
+        ...formData,
+        landrTrackId: formData.landrTrackId || ''
+      };
       
       const response = await fetch('/api/releases', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
       
       const responseData = await response.json();
