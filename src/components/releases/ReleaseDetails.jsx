@@ -14,6 +14,15 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
   const mainArtist = release.artists && release.artists.length > 0 ? release.artists[0] : null;
   const hasMultipleArtists = release.artists && release.artists.length > 1;
   
+  // Helper function to safely get artist ID as string
+  const getArtistIdAsString = (artist) => {
+    if (!artist) return '';
+    if (typeof artist === 'string') return artist;
+    if (artist.$oid) return artist.$oid;
+    if (artist._id) return typeof artist._id === 'string' ? artist._id : JSON.stringify(artist._id);
+    return '';
+  };
+  
   return (
     <main className="py-12 px-4 md:px-8 max-w-7xl mx-auto">
       <div className="flex flex-col gap-8 md:flex-row">
@@ -38,15 +47,20 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                 {mainArtist && (
                   <div>
                     <Link 
-                      href={`/artists/${mainArtist.slug}`} 
+                      href={typeof mainArtist === 'object' && mainArtist.slug ? `/artists/${mainArtist.slug}` : '#'} 
                       className="text-gray-400 hover:text-purple-400 transition-colors"
                     >
-                      {mainArtist.name}
+                      {typeof mainArtist === 'object' && mainArtist.name ? mainArtist.name : 'Artist'}
                     </Link>
                     
                     {hasMultipleArtists && (
                       <div className="text-sm text-gray-500 mt-1">
-                        featuring  {release.artists.slice(1).map(artist => artist.name).join(', ')}
+                        featuring  {release.artists.slice(1).map((artist, index) => (
+                          <span key={getArtistIdAsString(artist) || `artist-${index}`}>
+                            {typeof artist === 'object' && artist.name ? artist.name : `Artist ${index + 2}`}
+                            {index < release.artists.slice(1).length - 1 ? ', ' : ''}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -92,7 +106,7 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                 
                 {release.youtubeUrl && (
                   <Link 
-                    href={release.youtubeUrl} 
+                    href={`https://www.youtube.com/watch?v=${release.youtubeUrl}`} 
                     target="_blank" 
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-400 bg-red-950 rounded-full hover:bg-red-900 transition-colors"
                   >
@@ -125,13 +139,17 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
           
           {moreReleases.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold">More from {mainArtist?.name || 'This Artist'}</h2>
+              <h2 className="text-xl font-bold">More from {typeof mainArtist === 'object' && mainArtist.name ? mainArtist.name : 'This Artist'}</h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {moreReleases.map((rel) => {
-                  const relArtist = rel.artists && rel.artists.length > 0 ? rel.artists[0] : null;
+                {moreReleases.map((rel, index) => {
+                  // Handle ObjectId references in rel.artists
+                  const relArtist = rel.artists && rel.artists.length > 0 
+                    ? (typeof rel.artists[0] === 'object' ? rel.artists[0] : { name: 'Artist' })
+                    : null;
+                  
                   return (
                     <Link 
-                      key={rel._id ? rel._id.toString() : `release-${rel.title}`}
+                      key={rel._id ? (typeof rel._id === 'string' ? rel._id : JSON.stringify(rel._id)) : `release-${rel.title}-${index}`}
                       href={`/releases/${rel.slug}`} 
                       className="group block"
                     >
@@ -147,7 +165,9 @@ export default function ReleaseDetails({ release, moreReleases = [] }) {
                         {rel.title}
                       </h3>
                       {relArtist && (
-                        <p className="text-sm text-gray-400 truncate">{relArtist.name}</p>
+                        <p className="text-sm text-gray-400 truncate">
+                          {typeof relArtist === 'object' && relArtist.name ? relArtist.name : 'Artist'}
+                        </p>
                       )}
                     </Link>
                   );

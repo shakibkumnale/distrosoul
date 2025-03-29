@@ -36,6 +36,37 @@ export default function ReleasesGrid({ releases = [], className = '' }) {
     return `release-index-${index}`;
   };
 
+  // Helper function to safely get artist name
+  const getArtistName = (release) => {
+    // First try to get from artist object in the array
+    if (release.artists && release.artists.length > 0) {
+      const artist = release.artists[0];
+      
+      // Handle different artist formats
+      if (typeof artist === 'object') {
+        // If it's a populated artist object with name
+        if (artist.name) {
+          return artist.name;
+        }
+        
+        // If it's an ObjectId reference
+        if (artist.$oid || artist._id) {
+          // Use artistName as fallback when we only have an ID reference
+          if (release.artistName) {
+            return release.artistName;
+          }
+        }
+      }
+    }
+    
+    // Fall back to artistName field if it exists
+    if (release.artistName) {
+      return release.artistName;
+    }
+    
+    return 'Unknown Artist';
+  };
+
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${className}`}>
       {releases.map((release, index) => (
@@ -89,7 +120,7 @@ export default function ReleasesGrid({ releases = [], className = '' }) {
               {release.title || 'Untitled Release'}
             </h3>
             <p className="text-gray-400 text-sm mt-1">
-              {release.artistName || 'Unknown Artist'}
+              {getArtistName(release)}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-xs px-2 py-1 rounded-full bg-purple-900/50 text-purple-300">

@@ -31,14 +31,22 @@ async function getArtistData(slug) {
   }
   
   const releases = await Release.find({ artists: artist._id })
+    .populate('artists')
     .sort({ releaseDate: -1 })
     .lean();
   
   console.log(`Found ${releases.length} releases for artist ${artist.name} (ID: ${artist._id})`);
   
+  const releasesWithArtistInfo = releases.map(release => {
+    return {
+      ...release,
+      artistName: artist.name
+    };
+  });
+  
   return {
     artist: serializeMongoDB(artist),
-    releases: serializeMongoDB(releases)
+    releases: serializeMongoDB(releasesWithArtistInfo)
   };
 }
 

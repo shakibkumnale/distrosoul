@@ -60,7 +60,8 @@ export default function MediaPlayer({
           
         ) : currentTab === 'youtube' && youtubeUrl ? (
           <iframe
-            src={youtubeUrl.replace('watch?v=', 'embed/')}
+            // src={youtubeUrl.replace('watch?v=', 'embed/')}
+            src={`https://www.youtube.com/embed/${youtubeUrl}?si=QwCmsO7Y-DZiGaRE`}
             width="100%"
             height="100%"
             allowFullScreen
