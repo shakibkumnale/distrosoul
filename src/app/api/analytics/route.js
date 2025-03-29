@@ -31,7 +31,7 @@ export async function GET(request) {
     // Filter by artist - need to find all releases by this artist first
     if (artist && mongoose.Types.ObjectId.isValid(artist)) {
       const artistReleases = await Release.find({
-        artists: mongoose.Types.ObjectId(artist)
+        artists: new mongoose.Types.ObjectId(artist)
       }).select('_id').lean();
       
       const releaseIds = artistReleases.map(r => r._id);
@@ -43,7 +43,8 @@ export async function GET(request) {
         return NextResponse.json({
           analytics: [],
           recentReports: [],
-          artists: []
+          artists: [],
+          currentArtist: null
         });
       }
     }
@@ -63,6 +64,7 @@ export async function GET(request) {
       {
         $group: {
           _id: '$releaseId',
+          landrTrackId: { $first: '$landrTrackId' },
           latestData: { $first: '$$ROOT' },
           totalStreams: { $max: '$streams.count' }, // Use max to get the latest lifetime total
           totalDownloads: { $max: '$downloads.count' }, // Use max for downloads too
@@ -73,11 +75,11 @@ export async function GET(request) {
       { $limit: limit }
     ]);
     
-    // Get release details
+    // Get release details with populated artists
     const releaseIds = streamSummary.map(item => item._id);
     const releases = await Release.find({
       _id: { $in: releaseIds }
-    }).select('title slug coverImage artists').populate('artists', 'name slug').lean();
+    }).select('title slug coverImage artists').populate('artists', 'name slug image').lean();
     
     // Create a lookup map for releases
     const releaseMap = {};
@@ -96,6 +98,7 @@ export async function GET(request) {
         slug: release.slug || '',
         coverImage: release.coverImage || '',
         artists: release.artists || [],
+        landrTrackId: item.landrTrackId,
         totalStreams: item.totalStreams,
         totalDownloads: item.totalDownloads,
         latestDate: item.latestDate,
@@ -124,9 +127,19 @@ export async function GET(request) {
           as: 'releases'
         }
       },
+      // Join with StreamData to find artists with stream data
+      {
+        $lookup: {
+          from: 'streamdatas',
+          localField: 'releases._id',
+          foreignField: 'releaseId',
+          as: 'streamData'
+        }
+      },
       {
         $match: {
-          'releases': { $ne: [] }
+          'releases': { $ne: [] },
+          'streamData': { $ne: [] }  // Only artists with stream data
         }
       },
       {
@@ -134,16 +147,26 @@ export async function GET(request) {
           _id: 1,
           name: 1,
           slug: 1,
-          releaseCount: { $size: '$releases' }
+          image: 1,
+          releaseCount: { $size: '$releases' },
+          totalReleases: { $size: '$releases' },
+          totalStreams: { $sum: '$streamData.streams.count' }
         }
       },
       { $sort: { name: 1 } }
     ]);
     
+    // Get current artist details if filtered by artist
+    let currentArtist = null;
+    if (artist && mongoose.Types.ObjectId.isValid(artist)) {
+      currentArtist = await Artist.findById(artist).select('name slug image').lean();
+    }
+    
     return NextResponse.json({
       analytics: analyticsData,
       recentReports: recentReports.map(r => r._id),
-      artists: artistsWithData
+      artists: artistsWithData,
+      currentArtist
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
